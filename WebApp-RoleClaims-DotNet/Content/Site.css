@@ -1,0 +1,85 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.assign-role {
+    float:left;
+}
+
+.search-hint {
+    width:200px;    
+}
+
+#search {
+    width:300px;
+}
+
+#assign-role {
+    padding-bottom: 20px;
+}
+
+#assign-role-form {
+    padding-right: 20px;
+    display:inline-block;
+    vertical-align:top;
+}
+
+#assign-role-search {
+
+}
+
+.assign-role-label {
+    float:left;
+    width:175px;
+    text-align:right;
+    padding-right: 10px;
+}
+
+#assign-role-select {
+
+}
+
+.search-results-label {
+    width:inherit;
+    text-align:center;
+    border-bottom:solid;
+    border-bottom-width:thin;
+}
+
+#search-results {
+    display:inline-block;
+}
+
+.assign-role-row {
+    padding-bottom:10px;
+}
+
+#submit-button {
+    width:100px;
+}
+
+#assign-role-dropdown {
+    width:100px;
+}
+

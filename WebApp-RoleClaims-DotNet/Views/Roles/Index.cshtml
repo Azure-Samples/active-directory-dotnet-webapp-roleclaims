@@ -1,0 +1,107 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <h2>Manage Application Roles</h2>
+
+    //Form to Assign a New Role
+    using (Html.BeginForm("AssignRole", "Roles", FormMethod.Post, new { id = "assign-form" }))
+    {
+        <input id="hidden-input" type="hidden" name="id" />
+        <div id="assign-role">
+            <div id="assign-role-form">
+                <div id="assign-role-search" class="assign-role-row">
+                    <p class="assign-role-label">Search for Users/Groups:</p>
+                    <input id="search" type="text" name="input">
+                </div>
+                <div id="assign-role-select" class="assign-role-row">
+                    <p class="assign-role-label">Select Role:</p>
+                    <select name="role" id="assign-role-dropdown">
+                        @foreach (String str in (List<String>)ViewData["roles"])
+                        {
+                            <option class="assign-role" value="@str"> @str</option>
+                        }
+                    </select>
+                </div>
+                <div id="assign-role-submit" class="assign-role-row">
+                    <p class="assign-role-label"></p>
+                    <input type="submit" id="submit-button" value="Assign Role" />
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // People/Group Picker Code
+            var maxResultsPerPage = 14;
+            var searchUrl = window.location.protocol + "//" + window.location.host + "/Roles/Search";
+            var input = document.getElementById("search");
+            var token = "@ViewData["token"]";
+            var tenant = "@ViewData["tenant"]";
+
+            var picker = new AadPicker(searchUrl, maxResultsPerPage, input, token, tenant);
+
+            // Submit the selected user/group to be asssigned.
+            $("#submit-button").click({ picker: picker }, function () {
+                if (!picker.Selected())
+                    return;
+                var form = $("#assign-form").get()[0].elements["id"].value = picker.Selected().objectId;  
+            });
+
+        </script>
+    }
+
+    <p>*Note that Azure AD Application Owners will have Admin Access, but will not appear below
+    unless explicitly assigned.  You can manage Application Owners in the 
+    <a href="https://manage.windowsazure.com">Azure Management Portal</a>.</p>
+
+    //List out users in each role with checkboxes for removing roles
+    using (Html.BeginForm("RemoveRole", "Roles", FormMethod.Post))
+    {
+        //foreach app role
+        foreach (string str in (List<String>)ViewData["roles"])
+        {            
+            <h3>@str</h3>
+
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <th>Name</th>
+                    <th>ObjectID</th>
+                    <th>Delete</th>
+
+                </tr>
+
+                @*for each mapping entry in that role*@
+                @foreach (WebApp_RoleClaims_DotNet.Models.RoleMapping mapping in (List<WebApp_RoleClaims_DotNet.Models.RoleMapping>)ViewData["mappings"])
+                {
+                    if (mapping.Role == str)
+                    { 
+                        <tr>
+                            <td>
+                                @if ((((Dictionary<string, string>)ViewData["nameDict"])[@mapping.ObjectId]) == null)
+                                {
+                                    <span style="color: red;">Object No Longer Exists in AAD</span>
+                                }
+                                else
+                                {
+                                    @(((Dictionary<string, string>)ViewData["nameDict"])[@mapping.ObjectId])
+                                }
+                            </td>
+                            <td>
+                                @mapping.ObjectId
+                            </td>
+                            <td>
+                                <input type="checkbox" name="@mapping.RoleMappingID" value="delete" />
+                            </td>
+                        </tr>
+                    }
+                }
+            </table>
+            
+        }
+
+        <input type="submit" value="Remove Roles" />
+    }
+
+}
