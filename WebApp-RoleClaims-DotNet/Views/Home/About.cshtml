@@ -4,7 +4,7 @@
 <h2>@ViewBag.Title.</h2>
 <h3>Your Current Application Roles:</h3>
 <ul>
-    @foreach (string str in (List<string>)ViewData["myroles"])
+    @foreach (string str in (List<string>)ViewData["appRoles"])
     {
         <li>@str</li>
     }

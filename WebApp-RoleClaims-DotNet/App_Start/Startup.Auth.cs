@@ -47,15 +47,18 @@ namespace WebApp_RoleClaims_DotNet
                     },
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
-                        AuthorizationCodeReceived = async context =>
+                        AuthorizationCodeReceived = context =>
                         {
+                            // Set Tenant-Dependent Configuration Values
                             ClaimsIdentity claimsId = context.AuthenticationTicket.Identity; 
-                            string userObjectId = claimsId.FindFirst(Globals.ObjectIdClaimType).Value;
-                            ConfigHelper.Authority = String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, claimsId.FindFirst(Globals.TenantIdClaimType).Value);
-                            ConfigHelper.GraphServiceRoot = new Uri (ConfigHelper.GraphResourceId + claimsId.FindFirst(Globals.TenantIdClaimType).Value);
+                            string tenantId = claimsId.FindFirst(Globals.TenantIdClaimType).Value;
+                            ConfigHelper.Authority = String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantId);
+                            ConfigHelper.GraphServiceRoot = new Uri (ConfigHelper.GraphResourceId + tenantId);
 
+                            // Get Access Token for User's Directory
                             try
                             {
+                                string userObjectId = claimsId.FindFirst(Globals.ObjectIdClaimType).Value;
                                 ClientCredential credential = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
                                 AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectId));
                                 AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(
@@ -67,87 +70,20 @@ namespace WebApp_RoleClaims_DotNet
                                 context.Response.Redirect("/Error/ShowError?errorMessage=Were having trouble signing you in&signIn=true");
                             }
 
-                            try
-                            {
-                                if (claimsId.FindFirst("_claim_sources") != null)
-                                    await AddGroupClaimsFromGraphAPI(claimsId, userObjectId); //TODO: Can I run this async?
-                            }
-                            catch (Exception e)
-                            {
-                                claimsId.AddClaim(new Claim("groups", "error", ClaimValueTypes.String));
-                            }
+                            foreach (Claim claim in claimsId.Claims)
+                                claimsId.AddClaim(new Claim(ClaimTypes.Role, claim.Value, ClaimValueTypes.String, "WebApp_RoleClaims_DotNet"));
 
+                            return Task.FromResult(0);
+                        },
 
-                            return;
+                        RedirectToIdentityProvider = context =>
+                        {
+                            if (context.Request.Path.Value.Equals("/Account/SignIn") && context.Request.Query.Equals("admin_consent=true"))
+                                context.ProtocolMessage.Prompt = "admin_consent";
+                            return Task.FromResult(0);
                         }
-
-                        //RedirectToIdentityProvider = context => {
-                        //    context.ProtocolMessage.Prompt = "admin_consent";
-                        //    return Task.FromResult(0);
-                        //}
                     }
                 });
-        }
-
-        /// <summary>
-        /// We must query the GraphAPI to obtain information about the user and the security groups they are a member of.
-        /// Here we use the GraphAPI Client Library to do so.
-        /// </summary>
-        private async Task AddGroupClaimsFromGraphAPI(ClaimsIdentity claimsIdentity, string userObjectId)
-        {
-            // Acquire the Access Token
-            ClientCredential credential = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
-            AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectId));
-            AuthenticationResult result = authContext.AcquireTokenSilent(ConfigHelper.GraphResourceId, credential,
-                new UserIdentifier(userObjectId, UserIdentifierType.UniqueId));
-
-            // Get the GraphAPI Group Endpoint for the specific user from the _claim_sources claim in token
-            string namesJSON = claimsIdentity.FindFirst("_claim_sources").Value;
-            ClaimSource source = JsonConvert.DeserializeObject<ClaimSource>(namesJSON);
-            string requestUrl = String.Format(CultureInfo.InvariantCulture, HttpUtility.HtmlEncode(source.src1.endpoint
-                + "?api-version=" + ConfigHelper.GraphApiVersion));
-
-            // Prepare and Make the POST request
-            HttpClient client = new HttpClient();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
-            StringContent content = new StringContent("{\"securityEnabledOnly\": \"true\"}");
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            request.Content = content;
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            // Endpoint returns JSON with an array of Group ObjectIDs
-            if (response.IsSuccessStatusCode)
-            {
-                string responseContent = await response.Content.ReadAsStringAsync();
-                GroupResponse groups = JsonConvert.DeserializeObject<GroupResponse>(responseContent);
-
-                // For each Group, add its Object ID to the ClaimsIdentity as a Group Claim
-                foreach (string groupObjectID in groups.value)
-                    claimsIdentity.AddClaim(new Claim("groups", groupObjectID, ClaimValueTypes.String, "AAD-Tenant-Security-Groups")); //TODO type?
-
-                return;
-            }
-            else
-            {
-                throw new WebException();
-            }
-        }
-
-        private class ClaimSource
-        {
-            public Endpoint src1 { get; set; }
-
-            public class Endpoint
-            {
-                public string endpoint { get; set; }
-            }
-        }
-
-        private class GroupResponse
-        {
-            public string metadata { get; set; }
-            public List<string> value { get; set; }
         }
     }
 }

@@ -1,9 +1,15 @@
 ﻿using Microsoft.Azure.ActiveDirectory.GraphClient;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq.Expressions;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebApp_RoleClaims_DotNet.Utils;
@@ -30,93 +36,48 @@ namespace WebApp_RoleClaims_DotNet.Controllers
         /// <returns>Role <see cref="View"/> with inputs to edit application role mappings.</returns>
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            AuthenticationResult result;
-            // Get an access token
+            Dictionary<string, List<IUserGroup>> roleAssignments = new Dictionary<string,List<IUserGroup>>();
+            List<KeyValuePair<string, string>> appRoleGuids;
+
+            // Get All Roles for the Application
             try
             {
-                string userObjectId = ClaimsPrincipal.Current.FindFirst(Globals.ObjectIdClaimType).Value;
-                ClientCredential cred = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
-                AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectId));
-                result = authContext.AcquireTokenSilent(ConfigHelper.GraphResourceId, ConfigHelper.ClientId, new UserIdentifier(userObjectId, UserIdentifierType.UniqueId));
+                appRoleGuids = await GetApplicationRoles();
+                foreach (KeyValuePair<string, string> kvp in appRoleGuids)
+                    roleAssignments[kvp.Key] = new List<IUserGroup>();
+            }
+            catch (Exception e)
+            {
+                return RedirectToAction("ShowError", "Error", new { errorMessage = "Error while getting application roles." });                
+            }
+
+            // Get an Access Token for the User's Directory
+            UserQueryResult users;
+            GroupQueryResult groups;
+            try
+            {
+                users = await GetAllUsers();
+                groups = await GetAllGroups(); // TODO: Multiple Threads
             }
             catch (AdalException e)
             {
                 // If the user doesn't have an access token, they need to re-authorize
                 if (e.ErrorCode == "failed_to_acquire_token_silently")
                     return RedirectToAction("Reauth", "Error", new { redirectUri = Request.Url });
-
                 return RedirectToAction("ShowError", "Error", new { errorMessage = "Error while acquiring token." });
             }
-
-            // Setup the graph connection
-            GraphSettings graphSettings = new GraphSettings();
-            graphSettings.ApiVersion = ConfigHelper.GraphApiVersion;
-            GraphConnection graphConnection = new GraphConnection(result.AccessToken, graphSettings);
-
-            try
-            {
-                FilterGenerator filter = new FilterGenerator();
-                filter.QueryFilter = Microsoft.Azure.ActiveDirectory.GraphClient.ExpressionHelper.CreateEqualsExpression(typeof(Application), GraphProperty.AppId, new Guid(ConfigHelper.ClientId));
-                    //CreateConditionalExpression(typeof(Application),
-                    //GraphProperty.AppId, new Guid(ConfigHelper.ClientId), ExpressionType.Equal);
-                PagedResults<Application> pagedApp = graphConnection.List<Application>(null, filter);
-
-                PagedResults<DirectoryObject> temp = graphConnection.GetLinkedObjects(pagedApp.Results[0], LinkProperty.MemberOf, null);
-            }
-            catch (GraphException e)
-            {
-                return RedirectToAction("ShowError", "Error", new { errorMessage = "Error while calling Graph API." });
+            catch (Exception e)
+            { 
+                return RedirectToAction("ShowError", "Error", new { errorMessage = "Error while getting users." });                
             }
 
-            //// Get Existing Mappings from Roles.xml
-            //List<RoleMapping> mappings = RolesDbHelper.GetAllRoleMappings();
+            // foreach user, and for each group
+                // batch request to the graph for appRoleAssignments
+                // for each role assignment
+                    // record user/group in result dictionary
 
-            ////Dictionary of <ObjectID, DisplayName> pairs
-            //var nameDict = new Dictionary<string, string>();
-
-            ////Get the Access Token for Calling Graph API
-            //AuthenticationContext authContext;
-            //AuthenticationResult result = null;
-            //try
-            //{
-            //    string userObjectId = ClaimsPrincipal.Current.FindFirst(Globals.ObjectIdClaimType).Value;
-            //    authContext = new AuthenticationContext(ConfigHelper.Authority,
-            //        new TokenDbCache(userObjectId));
-            //    var credential = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
-            //    result = authContext.AcquireTokenSilent(ConfigHelper.GraphResourceId, credential,
-            //        new UserIdentifier(userObjectId, UserIdentifierType.UniqueId));
-            //}
-            //catch (AdalException e)
-            //{
-            //    // If the user doesn't have an access token, they need to re-authorize
-            //    if (e.ErrorCode == "failed_to_acquire_token_silently")
-            //        return RedirectToAction("Reauth", "Error", new { redirectUri = Request.Url });
-                
-            //    return RedirectToAction("ShowError", "Error", new { errorMessage = "Error while acquiring token." });
-            //}
-
-            //// Construct the <ObjectID, DisplayName> Dictionary, Add Lists of Mappings to ViewData
-            //// for each type of role
-            //foreach (RoleMapping mapping in mappings)
-            //{
-            //    try
-            //    {
-            //        nameDict[mapping.ObjectId] = GetDisplayNameFromObjectId(result.AccessToken, mapping.ObjectId);
-            //    }
-            //    catch (GraphException e)
-            //    {
-            //        if (e.HttpStatusCode == HttpStatusCode.Unauthorized)
-            //        {
-            //            // The user needs to re-authorize.  Show them a message to that effect.
-            //            authContext.TokenCache.Clear();
-            //            RedirectToAction("Reauth", "Error", new { redirectUri = Request.Url });
-            //        }
-            //        return RedirectToAction("ShowError", "Error", new { errorMessage = "Error while calling Graph API." });
-            //    }
-            //}
-            
             //ViewData["mappings"] = mappings;
             //ViewData["nameDict"] = nameDict;
             //ViewData["roles"] = Globals.Roles;
@@ -274,5 +235,105 @@ namespace WebApp_RoleClaims_DotNet.Controllers
         //    }
         //}
         //#endregion
+
+        private async Task<List<KeyValuePair<string, string>>> GetApplicationRoles()
+        {
+            List<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>();
+
+            // Get Access Token for App's Directory
+            AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.AppAuthority, new TokenDbCache(ConfigHelper.ClientId));
+            AuthenticationResult authResult = authContext.AcquireTokenSilent(ConfigHelper.GraphResourceId, ConfigHelper.ClientId);
+
+            // Query the Graph for all Application Roles
+            string requestUri = String.Format(CultureInfo.InvariantCulture, 
+                "{0}{1}/applications?$filter=appId eq '{2}'&api-version={3}",
+                ConfigHelper.GraphResourceId, 
+                ConfigHelper.AppTenant, 
+                ConfigHelper.ClientId, 
+                ConfigHelper.GraphApiVersion);
+            string serialResponse = SendGetAsync(requestUri, authResult.AccessToken);
+            AppQueryResult apps = JsonConvert.DeserializeObjectAsync<AppQueryResult>(serialResponse);
+            foreach (AppRole appRole in apps.Value[0].appRoles)
+                result.Add(new KeyValuePair<string, string>(appRole.Id, appRole.displayName));
+
+            return result;
+        }
+
+        private async UserQueryResult GetAllUsers()
+        {
+            string userObjectId = ClaimsPrincipal.Current.FindFirst(Globals.ObjectIdClaimType).Value;
+            ClientCredential cred = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
+            AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectId));
+            AuthenticationResult authResult = authContext.AcquireTokenSilent(ConfigHelper.GraphResourceId, ConfigHelper.ClientId, new UserIdentifier(userObjectId, UserIdentifierType.UniqueId));
+
+            string requestUri = String.Format(CultureInfo.InvariantCulture,
+                "{0}{1}/users?api-version={2}",
+                ConfigHelper.GraphResourceId,
+                ClaimsPrincipal.Current.FindFirst(Globals.TenantIdClaimType).Value,
+                ConfigHelper.GraphApiVersion);
+
+            string serialResponse = await SendGetAsync(requestUri, authResult.AccessToken);
+            return JsonConvert.DeserializeObject<UserQueryResult>(serialResponse);
+        }
+
+        private async GroupQueryResult GetAllGroups()
+        {
+            string userObjectId = ClaimsPrincipal.Current.FindFirst(Globals.ObjectIdClaimType).Value;
+            ClientCredential cred = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
+            AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectId));
+            AuthenticationResult authResult = authContext.AcquireTokenSilent(ConfigHelper.GraphResourceId, ConfigHelper.ClientId, new UserIdentifier(userObjectId, UserIdentifierType.UniqueId));
+
+            string requestUri = String.Format(CultureInfo.InvariantCulture,
+                "{0}{1}/groups?api-version={2}",
+                ConfigHelper.GraphResourceId,
+                ClaimsPrincipal.Current.FindFirst(Globals.TenantIdClaimType).Value,
+                ConfigHelper.GraphApiVersion);
+
+            string serialResponse = await SendGetAsync(requestUri, authResult.AccessToken);
+            return JsonConvert.DeserializeObject<GroupQueryResult>(serialResponse);
+        }
+
+        private async string SendGetAsync(string requestUri, string accessToken)
+        {
+            HttpClient httpClient = new HttpClient();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            HttpHeaderValueCollection<MediaTypeWithQualityHeaderValue> contentType = new HttpHeaderValueCollection<MediaTypeWithQualityHeaderValue>();
+            contentType.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.Accept = contentType;
+            HttpResponseMessage response = await httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+                throw new WebException();
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        private abstract class IUserGroup
+        { 
+            // Common properties that we'll actually use.
+            // displayName, objectId
+        }
+
+        private class AppQueryResult
+        { 
+            // Need JSON response for this.
+        }
+
+        private class UserQueryResult
+        { 
+            // Need JSON response for this.
+        }
+
+        private class GroupQueryResult
+        {
+            // Need JSON response for this.
+        }
+
+        private class Value : IUserGroup
+        { 
+            // This will be generated by Json2C#
+        }
+    
     }
 }
