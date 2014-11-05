@@ -13,7 +13,6 @@ using System.Net;
 using System.Linq.Expressions;
 using Microsoft.Azure.ActiveDirectory.GraphClient.Extensions;
 using System.Threading.Tasks;
-using WebApp_RoleClaims_DotNet.Utils;
 
 
 //The following libraries were defined and added to this sample.
@@ -31,7 +30,7 @@ namespace WebApp_RoleClaims_DotNet.Controllers
         /// </summary>
         /// <returns>Generic Home <see cref="View"/>.</returns>
         [Authorize]
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {          
             return View();
         }

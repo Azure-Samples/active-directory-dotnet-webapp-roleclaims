@@ -64,7 +64,7 @@ namespace WebApp_RoleClaims_DotNet
                                 AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(
                                     context.Code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)), credential, ConfigHelper.GraphResourceId);
                             }
-                            catch (AdalException e)
+                            catch (AdalException)
                             {
                                 context.HandleResponse();
                                 context.Response.Redirect("/Error/ShowError?errorMessage=Were having trouble signing you in&signIn=true");

@@ -83,3 +83,15 @@ textarea {
     width:100px;
 }
 
+.view-role-label {
+    font-weight:bold;
+    background-color:lightgray;
+    border:solid;
+    border-width:thin;
+    margin-bottom:5px;
+    vertical-align:middle;
+}
+
+.view-roles-container {
+    margin-bottom: 30px;
+}

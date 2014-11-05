@@ -60,33 +60,34 @@
         {            
             <h3>@kvp.Value</h3>
 
-            <table class="table table-bordered table-striped">
-                <tr>
-                    <th>Name</th>
-                    <th>ObjectID</th>
-                    <th>Delete</th>
-
-                </tr>
+            <div class="container view-roles-container">
+                <div class="row view-role-label">
+                    <div class="col-md-5">Name</div>
+                    <div class="col-md-5">ObjectId</div>
+                    <div class="col-md-2">Delete</div>
+                </div>
 
                 @*for each mapping entry in that role*@
                 @foreach (WebApp_RoleClaims_DotNet.Models.Assignment assignment in (List<WebApp_RoleClaims_DotNet.Models.Assignment>)((Dictionary<string, List<WebApp_RoleClaims_DotNet.Models.Assignment>>)ViewData["roleAssignments"])[kvp.Key])
                 {
-                    <tr>
-                        <td>
-                            @assignment.displayName
-                        </td>
-                        <td>
-                            @assignment.objectId
-                        </td>
-                        <td>
+                    <div class="row">
+                        <div class="col-md-5">@assignment.displayName</div>
+                        <div class="col-md-5">@assignment.objectId</div>
+                        <div class="col-md-2">
                             <input type="checkbox" name="@assignment.assignmentId @assignment.objectId @assignment.objectType" value="delete" />
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
                 }
-            </table>
+            </div>
         }
-
-        <input type="submit" value="Remove Roles" />
+        
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10"></div>
+                <div class="col-md-2">
+                    <input type="submit" value="Remove Roles" />
+                </div>
+            </div>
+        </div>
     }
-
 }

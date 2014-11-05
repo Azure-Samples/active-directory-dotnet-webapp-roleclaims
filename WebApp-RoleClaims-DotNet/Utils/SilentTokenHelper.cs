@@ -8,14 +8,9 @@ using System.Threading.Tasks;
 
 namespace WebApp_RoleClaims_DotNet.Utils
 {
-    class GraphHelper
+    class SilentTokenHelper
     {
-        public async static Task<string> AcquireToken()
-        {
-            return GetToken();
-        }
-
-        public static string GetToken()
+        public static string AcquireToken()
         {
             string userObjectId = ClaimsPrincipal.Current.FindFirst(Globals.ObjectIdClaimType).Value;
             ClientCredential cred = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);

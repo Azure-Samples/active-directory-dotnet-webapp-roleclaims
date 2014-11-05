@@ -176,7 +176,6 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\IUserGroup.cs" />
     <Compile Include="Controllers\RolesController.cs" />
     <Compile Include="Controllers\TasksController.cs" />
     <Compile Include="DAL\RoleClaimContext.cs" />
@@ -184,11 +183,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201410302305395_init.cs" />
-    <Compile Include="Migrations\201410302305395_init.Designer.cs">
-      <DependentUpon>201410302305395_init.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Task.cs" />
     <Compile Include="Models\TokenCacheEntry.cs" />
     <Compile Include="Models\Assignment.cs" />
@@ -196,7 +190,7 @@
     <Compile Include="Startup.cs" />
     <Compile Include="Utils\ConfigHelper.cs" />
     <Compile Include="Utils\Globals.cs" />
-    <Compile Include="Utils\GraphHelper.cs" />
+    <Compile Include="Utils\SilentTokenHelper.cs" />
     <Compile Include="Utils\TokenDbCache.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -255,11 +249,6 @@
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\201410302305395_init.resx">
-      <DependentUpon>201410302305395_init.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
