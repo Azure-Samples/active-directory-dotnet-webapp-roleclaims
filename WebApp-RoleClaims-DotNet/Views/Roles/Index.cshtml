@@ -19,9 +19,9 @@
                 <div id="assign-role-select" class="assign-role-row">
                     <p class="assign-role-label">Select Role:</p>
                     <select name="role" id="assign-role-dropdown">
-                        @foreach (String str in (List<String>)ViewData["roles"])
+                        @foreach (KeyValuePair<string, string> kvp in (List<KeyValuePair<string, string>>)ViewData["roleGuids"])
                         {
-                            <option class="assign-role" value="@str"> @str</option>
+                            <option class="assign-role" value="@kvp.Key"> @kvp.Value</option>
                         }
                     </select>
                 </div>
@@ -52,17 +52,13 @@
         </script>
     }
 
-    <p>*Note that Azure AD Application Owners will have Admin Access, but will not appear below
-    unless explicitly assigned.  You can manage Application Owners in the 
-    <a href="https://manage.windowsazure.com">Azure Management Portal</a>.</p>
-
     //List out users in each role with checkboxes for removing roles
     using (Html.BeginForm("RemoveRole", "Roles", FormMethod.Post))
     {
         //foreach app role
-        foreach (string str in (List<String>)ViewData["roles"])
+        foreach (KeyValuePair<string, string> kvp in (List<KeyValuePair<string, string>>)ViewData["roleGuids"])
         {            
-            <h3>@str</h3>
+            <h3>@kvp.Value</h3>
 
             <table class="table table-bordered table-striped">
                 <tr>
@@ -73,32 +69,21 @@
                 </tr>
 
                 @*for each mapping entry in that role*@
-                @foreach (WebApp_RoleClaims_DotNet.Models.RoleMapping mapping in (List<WebApp_RoleClaims_DotNet.Models.RoleMapping>)ViewData["mappings"])
+                @foreach (WebApp_RoleClaims_DotNet.Models.Assignment assignment in (List<WebApp_RoleClaims_DotNet.Models.Assignment>)((Dictionary<string, List<WebApp_RoleClaims_DotNet.Models.Assignment>>)ViewData["roleAssignments"])[kvp.Key])
                 {
-                    if (mapping.Role == str)
-                    { 
-                        <tr>
-                            <td>
-                                @if ((((Dictionary<string, string>)ViewData["nameDict"])[@mapping.ObjectId]) == null)
-                                {
-                                    <span style="color: red;">Object No Longer Exists in AAD</span>
-                                }
-                                else
-                                {
-                                    @(((Dictionary<string, string>)ViewData["nameDict"])[@mapping.ObjectId])
-                                }
-                            </td>
-                            <td>
-                                @mapping.ObjectId
-                            </td>
-                            <td>
-                                <input type="checkbox" name="@mapping.RoleMappingID" value="delete" />
-                            </td>
-                        </tr>
-                    }
+                    <tr>
+                        <td>
+                            @assignment.displayName
+                        </td>
+                        <td>
+                            @assignment.objectId
+                        </td>
+                        <td>
+                            <input type="checkbox" name="@assignment.assignmentId @assignment.objectId @assignment.objectType" value="delete" />
+                        </td>
+                    </tr>
                 }
             </table>
-            
         }
 
         <input type="submit" value="Remove Roles" />

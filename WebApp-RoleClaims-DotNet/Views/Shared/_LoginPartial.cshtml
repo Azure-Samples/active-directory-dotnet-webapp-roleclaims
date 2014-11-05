@@ -14,7 +14,6 @@
 else
 {
     <ul class="nav navbar-nav navbar-right">
-        <li>@Html.ActionLink("Consent as Admin", "SignIn", "Account", new { admin_consent = "true" }, null)</li>
         <li>@Html.ActionLink("Sign in", "SignIn", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>
     </ul>
 }

@@ -25,7 +25,6 @@ namespace WebApp_RoleClaims_DotNet.Utils
         private static string graphApiVersion = ConfigurationManager.AppSettings["ida:GraphApiVersion"];
         private static readonly string postLogoutRedirectUri = ConfigurationManager.AppSettings["ida:PostLogoutRedirectUri"];
         private static string commonAuthority = String.Format(CultureInfo.InvariantCulture, aadInstance, "common/");
-        private static string appAuthority = String.Format(CultureInfo.InvariantCulture, aadInstance, appTenant);
 
         public static string ClientId { get { return clientId; } }
         internal static string AppKey { get { return appKey; } }
@@ -34,9 +33,8 @@ namespace WebApp_RoleClaims_DotNet.Utils
         internal static string AadInstance { get { return aadInstance; } }
         internal static string PostLogoutRedirectUri { get { return postLogoutRedirectUri; } }
         internal static string CommonAuthority { get { return commonAuthority; } }
-        internal static string AppAuthority { get { return appAuthority; } }
-        internal static string AppTenant { get { return appTenant; } }
         internal static string Authority { get; set; }
+        internal static Uri GraphServiceRoot { get; set; }
 
     }
 }

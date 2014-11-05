@@ -70,16 +70,10 @@ namespace WebApp_RoleClaims_DotNet
                                 context.Response.Redirect("/Error/ShowError?errorMessage=Were having trouble signing you in&signIn=true");
                             }
 
-                            foreach (Claim claim in claimsId.Claims)
+                            // Add MVC-Specific Role Claims for each AAD Role Claim Received
+                            foreach (Claim claim in claimsId.FindAll("roles"))
                                 claimsId.AddClaim(new Claim(ClaimTypes.Role, claim.Value, ClaimValueTypes.String, "WebApp_RoleClaims_DotNet"));
 
-                            return Task.FromResult(0);
-                        },
-
-                        RedirectToIdentityProvider = context =>
-                        {
-                            if (context.Request.Path.Value.Equals("/Account/SignIn") && context.Request.Query.Equals("admin_consent=true"))
-                                context.ProtocolMessage.Prompt = "admin_consent";
                             return Task.FromResult(0);
                         }
                     }

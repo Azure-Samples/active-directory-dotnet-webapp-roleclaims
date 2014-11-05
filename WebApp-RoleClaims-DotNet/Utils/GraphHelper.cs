@@ -10,7 +10,7 @@ namespace WebApp_RoleClaims_DotNet.Utils
 {
     class GraphHelper
     {
-        public static async Task<string> AcquireTokenForGraph()
+        public async static Task<string> AcquireToken()
         {
             return GetToken();
         }
@@ -23,6 +23,5 @@ namespace WebApp_RoleClaims_DotNet.Utils
             AuthenticationResult result = authContext.AcquireTokenSilent(ConfigHelper.GraphResourceId, cred, new UserIdentifier(userObjectId, UserIdentifierType.UniqueId));
             return result.AccessToken;
         }
-
     }
 }

@@ -13,6 +13,7 @@ using System.Net;
 using System.Linq.Expressions;
 using Microsoft.Azure.ActiveDirectory.GraphClient.Extensions;
 using System.Threading.Tasks;
+using WebApp_RoleClaims_DotNet.Utils;
 
 
 //The following libraries were defined and added to this sample.
@@ -21,6 +22,7 @@ using System.Threading.Tasks;
 
 namespace WebApp_RoleClaims_DotNet.Controllers
 {
+    
     public class HomeController : Controller
     {
         /// <summary>
@@ -28,8 +30,9 @@ namespace WebApp_RoleClaims_DotNet.Controllers
         /// users to see the home page and click the sign-in link.
         /// </summary>
         /// <returns>Generic Home <see cref="View"/>.</returns>
+        [Authorize]
         public async Task<ActionResult> Index()
-        {
+        {          
             return View();
         }
 
@@ -43,7 +46,7 @@ namespace WebApp_RoleClaims_DotNet.Controllers
         {
             var appRoles = new List<String>();
             foreach (Claim claim in ClaimsPrincipal.Current.FindAll(ClaimTypes.Role))
-                myroles.Add(claim.Value);
+                appRoles.Add(claim.Value);
             ViewData["appRoles"] = appRoles;
             return View();
         }
