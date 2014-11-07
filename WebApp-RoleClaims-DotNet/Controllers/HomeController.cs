@@ -29,7 +29,7 @@ namespace WebApp_RoleClaims_DotNet.Controllers
         /// users to see the home page and click the sign-in link.
         /// </summary>
         /// <returns>Generic Home <see cref="View"/>.</returns>
-        [Authorize]
+
         public ActionResult Index()
         {          
             return View();
