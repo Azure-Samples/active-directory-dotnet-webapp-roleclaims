@@ -10,7 +10,7 @@ For more information about how the protocols work in this scenario and other sce
 This MVC 5 web application is a simple "Task Tracker" application that allows users to create, read, update, and delete tasks.  Within the application, access to certain functionality is restricted to subsets of users. For instance, not every user has the ability to create a task.
 
 This kind of authorization is implemented using role based access control (RBAC).  When using RBAC, an administrator grants permissions to roles, not to individual users or groups. The administrator can then assign roles to different users and groups to control who has access to what content and functionality.  Our Task Tracker application defines four *Application Roles*:
-- Admin: Has the ability to perform all actions, as well as manage the Application Roles of other users.
+- Admin: Has the ability to perform all actions, as well as manage the Application Roles.
 - Writer: Has the ability to create tasks.
 - Approver: Has the ability to change the status of tasks.
 - Observer: Only has the ability to view tasks and their statuses.
