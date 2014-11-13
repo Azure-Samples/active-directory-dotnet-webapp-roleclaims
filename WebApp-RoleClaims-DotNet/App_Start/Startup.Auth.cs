@@ -43,10 +43,17 @@ namespace WebApp_RoleClaims_DotNet
                     ClientId = ConfigHelper.ClientId,
                     Authority = ConfigHelper.CommonAuthority,
                     PostLogoutRedirectUri = ConfigHelper.PostLogoutRedirectUri,
+
+                    // Here, we've disabled issuer validation for the multi-tenant sample.  This enables users
+                    // from ANY tenant to sign into the application (solely for the purposes of allowing the sample
+                    // to be run out-of-the-box.  For a real multi-tenant app, see the issuer validation in 
+                    // WebApp-MultiTenant-OpenIDConnect-DotNet.  If you're running this sample as a single-tenant
+                    // app, you can delete the following 4 lines.
                     TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
                     {
                         ValidateIssuer = false,
                     },
+
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
                         AuthorizationCodeReceived = async context =>
