@@ -19,7 +19,7 @@ Our Task Tracker application defines four *Application Roles*:
 - Approver: Has the ability to change the status of tasks.
 - Observer: Only has the ability to view tasks and their statuses.
 
-These application roles are defined in the [Azure Management Portal](https://manage.windowsazure.com/) on the application registration page.  When a user signs into the application, AAD emits a Role Claim for each role that has been granted based on the user and their group membership.  Assignment of users and groups to roles can be done through the portal's UI, or programatically using the [AAD Graph API](http://msdn.microsoft.com/en-us/library/azure/hh974476.aspx).  In this sample, the "Roles" page allows an Admin to assign and revoke roles from users and groups.
+These application roles are defined in the [Azure Management Portal](https://manage.windowsazure.com/) on the application registration page.  When a user signs into the application, AAD emits a Role Claim for each role that has been granted based on the user and their group membership.  Assignment of users and groups to roles can be done through the portal's UI, or programatically using the [AAD Graph API](http://msdn.microsoft.com/en-us/library/azure/hh974476.aspx).  In this sample, the "Roles" page allows an Admin to assign and revoke roles from users and groups, but this page is completely optional. All Application Role Management can be accomplished through the Azure Portal for each of your applications.
 
 Using RBAC with Application Roles and Role Claims, this application securely enforces authorization policies with minimal effort on the part of the developer.
 
