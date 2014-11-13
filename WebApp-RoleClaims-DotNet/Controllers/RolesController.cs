@@ -24,6 +24,12 @@ using WebApp_RoleClaims_DotNet.Models;
 
 namespace WebApp_RoleClaims_DotNet.Controllers
 {
+
+    // NOTE: This controller is included purely for showing how to manage AppRoleAssignments from 
+    // within the application via the GraphAPI.  All App Role management can be offloaded to the Azure
+    // Portal, where you can assign roles, revoke roles, etc.
+
+
     public class RolesController : Controller
     {
         #region controller_actions
