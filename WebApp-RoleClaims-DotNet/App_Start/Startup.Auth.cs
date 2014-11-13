@@ -46,7 +46,7 @@ namespace WebApp_RoleClaims_DotNet
 
                     // Here, we've disabled issuer validation for the multi-tenant sample.  This enables users
                     // from ANY tenant to sign into the application (solely for the purposes of allowing the sample
-                    // to be run out-of-the-box.  For a real multi-tenant app, see the issuer validation in 
+                    // to be run out-of-the-box.  For a real multi-tenant app, reference the issuer validation in 
                     // WebApp-MultiTenant-OpenIDConnect-DotNet.  If you're running this sample as a single-tenant
                     // app, you can delete the following 4 lines.
                     TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
@@ -83,43 +83,10 @@ namespace WebApp_RoleClaims_DotNet
                             foreach (Claim claim in claimsId.FindAll("roles"))
                                 claimsId.AddClaim(new Claim(ClaimTypes.Role, claim.Value, ClaimValueTypes.String, "WebApp_RoleClaims_DotNet"));
 
-                            // Add Application Owners as Admins (Temporary, see below)
-                            try {
-                                await AddOwnerAdminClaim(claimsId);
-                            }
-                            catch (Exception e)
-                            {
-                                context.HandleResponse();
-                                context.Response.Redirect("/Error/ShowError?errorMessage=Were having trouble signing you in&signIn=true");
-                            }
-
                             return;
                         }
                     }
                 });
-        }
-
-        // This method is included temporarily to enable the use of Role Claims with Single-Tenant Applications.
-        // It will be removed as soon as the Azure Portal UI supports Role Assignments on Single-Tenant Applications.
-        // If you are running this sample as a multi-tenant application, you can remove this method entirely and simply
-        // assign a user to the Admin role in the Azure Portal.
-        private async Task AddOwnerAdminClaim(ClaimsIdentity claimsId)
-        {
-            string userObjectId = claimsId.FindFirst(Globals.ObjectIdClaimType).Value;
-            ActiveDirectoryClient graphClient = new ActiveDirectoryClient(ConfigHelper.GraphServiceRoot, async () =>
-            {
-                ClientCredential cred = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
-                AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectId));
-                AuthenticationResult result = authContext.AcquireTokenSilent(ConfigHelper.GraphResourceId, cred, new UserIdentifier(userObjectId, UserIdentifierType.UniqueId));
-                return result.AccessToken;
-            });
-            IPagedCollection<IApplication> tenantApps = await graphClient.Applications.Where(a => a.AppId.Equals(ConfigHelper.ClientId)).ExecuteAsync();
-            if (tenantApps.CurrentPage.Count == 0)
-                return;
-            IApplicationFetcher appFetcher = (IApplicationFetcher)tenantApps.CurrentPage[0];
-            IPagedCollection<IDirectoryObject> appOwners = await appFetcher.Owners.Where(o => o.ObjectId.Equals(userObjectId)).ExecuteAsync();
-            if (appOwners.CurrentPage.Count > 0)
-                claimsId.AddClaim(new Claim(ClaimTypes.Role, "Admin", ClaimValueTypes.String, "WebApp_RoleClaims_DotNet"));
         }
     }
 }
