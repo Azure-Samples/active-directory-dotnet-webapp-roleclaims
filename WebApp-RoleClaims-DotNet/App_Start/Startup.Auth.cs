@@ -49,33 +49,30 @@ namespace WebApp_RoleClaims_DotNet
                     // from ANY tenant to sign into the application (solely for the purposes of allowing the sample
                     // to be run out-of-the-box.  For a real multi-tenant app, reference the issuer validation in 
                     // WebApp-MultiTenant-OpenIDConnect-DotNet.  If you're running this sample as a single-tenant
-                    // app, you can delete the following 4 lines.
-                    TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters // For Multi-Tenant Only
+                    // app, you can delete the ValidateIssuer property below.
+                    TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters 
                     {
-                        ValidateIssuer = false,
+                        ValidateIssuer = false, // For Multi-Tenant Only
+                        RoleClaimType = "roles",
                     },
 
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
                         SecurityTokenValidated = context =>
                         {
-                            // Add MVC-Specific Role Claims for each AAD Role Claim Received
-                            foreach (Claim claim in claimsId.FindAll("roles"))
-                                claimsId.AddClaim(new Claim(ClaimTypes.Role, claim.Value, ClaimValueTypes.String, "WebApp_RoleClaims_DotNet"));
+                            // Set Tenant-Dependent Configuration Values
+                            string tenantId = context.AuthenticationTicket.Identity.FindFirst(Globals.TenantIdClaimType).Value;
+                            ConfigHelper.Authority = String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantId);
+                            ConfigHelper.GraphServiceRoot = new Uri(ConfigHelper.GraphResourceId + tenantId);
+                            return Task.FromResult(0);
                         },
 
                         AuthorizationCodeReceived = async context =>
                         {
-                            // Set Tenant-Dependent Configuration Values
-                            ClaimsIdentity claimsId = context.AuthenticationTicket.Identity; 
-                            string tenantId = claimsId.FindFirst(Globals.TenantIdClaimType).Value;
-                            ConfigHelper.Authority = String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantId);
-                            ConfigHelper.GraphServiceRoot = new Uri (ConfigHelper.GraphResourceId + tenantId);
-
                             // Get Access Token for User's Directory
                             try
                             {
-                                string userObjectId = claimsId.FindFirst(Globals.ObjectIdClaimType).Value;
+                                string userObjectId = context.AuthenticationTicket.Identity.FindFirst(Globals.ObjectIdClaimType).Value;
                                 ClientCredential credential = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
                                 AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectId));
                                 AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(

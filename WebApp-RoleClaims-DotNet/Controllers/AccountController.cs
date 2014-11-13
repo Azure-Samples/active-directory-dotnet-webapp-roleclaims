@@ -36,10 +36,12 @@ namespace WebApp_RoleClaims_DotNet.Controllers
             // Remove all cache entries for this user and send an OpenID Connect sign-out request.
             if (Request.IsAuthenticated)
             {
-                string userObjectID =
-                ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
-                var authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectID));
-                authContext.TokenCache.Clear();
+                Claim userObjectIdClaim = ClaimsPrincipal.Current.FindFirst(Globals.ObjectIdClaimType);
+                if (userObjectIdClaim != null && !string.IsNullOrEmpty(ConfigHelper.Authority))
+                {
+                    var authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectIdClaim.Value));
+                    authContext.TokenCache.Clear();
+                }
 
                 HttpContext.GetOwinContext().Authentication.SignOut(
                     OpenIdConnectAuthenticationDefaults.AuthenticationType, CookieAuthenticationDefaults.AuthenticationType);

@@ -43,8 +43,9 @@ namespace WebApp_RoleClaims_DotNet.Controllers
         [Authorize]
         public ActionResult About()
         {
+            ClaimsIdentity claimsId = ClaimsPrincipal.Current.Identity as ClaimsIdentity;
             var appRoles = new List<String>();
-            foreach (Claim claim in ClaimsPrincipal.Current.FindAll(ClaimTypes.Role))
+            foreach (Claim claim in ClaimsPrincipal.Current.FindAll(claimsId.RoleClaimType))
                 appRoles.Add(claim.Value);
             ViewData["appRoles"] = appRoles;
             return View();
