@@ -41,7 +41,8 @@ namespace WebApp_RoleClaims_DotNet
                 new OpenIdConnectAuthenticationOptions
                 {
                     ClientId = ConfigHelper.ClientId,
-                    Authority = ConfigHelper.CommonAuthority,
+                    //Authority = String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, ConfigHelper.Tenant), // For Single-Tenant
+                    Authority = ConfigHelper.CommonAuthority, // For Multi-Tenant
                     PostLogoutRedirectUri = ConfigHelper.PostLogoutRedirectUri,
 
                     // Here, we've disabled issuer validation for the multi-tenant sample.  This enables users
@@ -49,13 +50,20 @@ namespace WebApp_RoleClaims_DotNet
                     // to be run out-of-the-box.  For a real multi-tenant app, reference the issuer validation in 
                     // WebApp-MultiTenant-OpenIDConnect-DotNet.  If you're running this sample as a single-tenant
                     // app, you can delete the following 4 lines.
-                    TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
+                    TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters // For Multi-Tenant Only
                     {
                         ValidateIssuer = false,
                     },
 
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
+                        SecurityTokenValidated = context =>
+                        {
+                            // Add MVC-Specific Role Claims for each AAD Role Claim Received
+                            foreach (Claim claim in claimsId.FindAll("roles"))
+                                claimsId.AddClaim(new Claim(ClaimTypes.Role, claim.Value, ClaimValueTypes.String, "WebApp_RoleClaims_DotNet"));
+                        },
+
                         AuthorizationCodeReceived = async context =>
                         {
                             // Set Tenant-Dependent Configuration Values
@@ -78,12 +86,6 @@ namespace WebApp_RoleClaims_DotNet
                                 context.HandleResponse();
                                 context.Response.Redirect("/Error/ShowError?errorMessage=Were having trouble signing you in&signIn=true");
                             }
-
-                            // Add MVC-Specific Role Claims for each AAD Role Claim Received
-                            foreach (Claim claim in claimsId.FindAll("roles"))
-                                claimsId.AddClaim(new Claim(ClaimTypes.Role, claim.Value, ClaimValueTypes.String, "WebApp_RoleClaims_DotNet"));
-
-                            return;
                         }
                     }
                 });
