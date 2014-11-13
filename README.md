@@ -24,6 +24,7 @@ These application roles are defined in the [Azure Management Portal](https://man
 Using RBAC with Application Roles and Role Claims, this application securely enforces authorization policies with minimal effort on the part of the developer.
 
 NOTE: Role claims are not currently emitted in SAML tokens, only JWTs (see issue #1).
+
 NOTE: Role claims are not currently emitted for guest users in a tenant (see issue #2).
 
 ## How To Run The Sample as a MultiTenant App
