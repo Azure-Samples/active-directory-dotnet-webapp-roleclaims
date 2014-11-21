@@ -67,7 +67,7 @@ namespace WebApp_RoleClaims_DotNet
                             return Task.FromResult(0);
                         },
 
-                        AuthorizationCodeReceived = async context =>
+                        AuthorizationCodeReceived = context =>
                         {
                             // Get Access Token for User's Directory
                             try
@@ -83,6 +83,7 @@ namespace WebApp_RoleClaims_DotNet
                                 context.HandleResponse();
                                 context.Response.Redirect("/Error/ShowError?errorMessage=Were having trouble signing you in&signIn=true");
                             }
+                            return Task.FromResult(0);
                         }
                     }
                 });
