@@ -58,25 +58,20 @@ namespace WebApp_RoleClaims_DotNet
 
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
-                        SecurityTokenValidated = context =>
-                        {
-                            // Set Tenant-Dependent Configuration Values
-                            string tenantId = context.AuthenticationTicket.Identity.FindFirst(Globals.TenantIdClaimType).Value;
-                            ConfigHelper.Authority = String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantId);
-                            ConfigHelper.GraphServiceRoot = new Uri(ConfigHelper.GraphResourceId + tenantId);
-                            return Task.FromResult(0);
-                        },
-
                         AuthorizationCodeReceived = context =>
                         {
                             // Get Access Token for User's Directory
                             try
                             {
                                 string userObjectId = context.AuthenticationTicket.Identity.FindFirst(Globals.ObjectIdClaimType).Value;
+                                string tenantId = context.AuthenticationTicket.Identity.FindFirst(Globals.TenantIdClaimType).Value;
                                 ClientCredential credential = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
-                                AuthenticationContext authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectId));
+                                AuthenticationContext authContext = new AuthenticationContext(
+                                    String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantId),
+                                    new TokenDbCache(userObjectId));
                                 AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(
-                                    context.Code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)), credential, ConfigHelper.GraphResourceId);
+                                    context.Code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)),
+                                    credential, ConfigHelper.GraphResourceId);
                             }
                             catch (AdalException)
                             {

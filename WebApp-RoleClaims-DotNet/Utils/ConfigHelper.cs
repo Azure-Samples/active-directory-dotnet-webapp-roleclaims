@@ -33,9 +33,7 @@ namespace WebApp_RoleClaims_DotNet.Utils
         internal static string AadInstance { get { return aadInstance; } }
         internal static string PostLogoutRedirectUri { get { return postLogoutRedirectUri; } }
         internal static string CommonAuthority { get { return commonAuthority; } }
-        internal static string Authority { get; set; }
         internal static string Tenant { get { return appTenant; } }
-        internal static Uri GraphServiceRoot { get; set; }
 
     }
 }

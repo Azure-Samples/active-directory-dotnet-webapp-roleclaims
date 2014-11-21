@@ -10,7 +10,7 @@ namespace WebApp_RoleClaims_DotNet.Utils
     {
         private static string objectIdClaimType = "http://schemas.microsoft.com/identity/claims/objectidentifier";
         private const string tenantIdClaimType = "http://schemas.microsoft.com/identity/claims/tenantid";
-        private static List<String> taskStatuses = new List<String>(new String[4] { "NotStarted", "InProgress", "Complete", "Blocked" });
+        private static List<String> taskStatuses = new List<String>(new String[4] { "Not  Started", "In Progress", "Complete", "Blocked" });
 
         internal static string ObjectIdClaimType { get { return objectIdClaimType; } }
         internal static string TenantIdClaimType { get { return tenantIdClaimType; } }

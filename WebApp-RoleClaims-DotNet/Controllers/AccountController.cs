@@ -2,14 +2,17 @@
 using System.Web.Mvc;
 
 //The following libraries were added to this sample.
+using System;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
 using System.Security.Claims;
+using System.Globalization;
 
 //The following libraries were defined and added to this sample.
 using WebApp_RoleClaims_DotNet.Utils;
+
 
 namespace WebApp_RoleClaims_DotNet.Controllers
 {
@@ -37,9 +40,12 @@ namespace WebApp_RoleClaims_DotNet.Controllers
             if (Request.IsAuthenticated)
             {
                 Claim userObjectIdClaim = ClaimsPrincipal.Current.FindFirst(Globals.ObjectIdClaimType);
-                if (userObjectIdClaim != null && !string.IsNullOrEmpty(ConfigHelper.Authority))
+                Claim tenantIdClaim = ClaimsPrincipal.Current.FindFirst(Globals.TenantIdClaimType);
+                if (userObjectIdClaim != null && tenantIdClaim != null)
                 {
-                    var authContext = new AuthenticationContext(ConfigHelper.Authority, new TokenDbCache(userObjectIdClaim.Value));
+                    var authContext = new AuthenticationContext(
+                        String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantIdClaim.Value),
+                        new TokenDbCache(userObjectIdClaim.Value));
                     authContext.TokenCache.Clear();
                 }
 

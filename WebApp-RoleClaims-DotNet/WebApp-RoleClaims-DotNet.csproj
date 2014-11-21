@@ -178,7 +178,6 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\RolesController.cs" />
     <Compile Include="Controllers\TasksController.cs" />
     <Compile Include="DAL\RoleClaimContext.cs" />
     <Compile Include="DAL\TasksDbHelper.cs" />
@@ -187,12 +186,10 @@
     </Compile>
     <Compile Include="Models\Task.cs" />
     <Compile Include="Models\TokenCacheEntry.cs" />
-    <Compile Include="Models\Assignment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Utils\ConfigHelper.cs" />
     <Compile Include="Utils\Globals.cs" />
-    <Compile Include="Utils\SilentTokenHelper.cs" />
     <Compile Include="Utils\TokenDbCache.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -236,7 +233,6 @@
     <Content Include="Views\Error\ShowError.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Roles\Index.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
