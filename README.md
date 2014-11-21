@@ -19,7 +19,7 @@ Our Task Tracker application defines four *Application Roles*:
 - Approver: Has the ability to change the status of tasks.
 - Observer: Only has the ability to view tasks and their statuses.
 
-These application roles are defined in the [Azure Management Portal](https://manage.windowsazure.com/) on the application registration page.  When a user signs into the application, AAD emits a Role Claim for each role that has been granted based on the user and their group membership.  Assignment of users and groups to roles can be done through the portal's UI, or programatically using the [AAD Graph API](http://msdn.microsoft.com/en-us/library/azure/hh974476.aspx).  In this sample, the "Roles" page allows an Admin to assign and revoke roles from users and groups, but this page is completely optional. All Application Role Management can be accomplished through the Azure Portal for each of your applications.
+These application roles are defined in the [Azure Management Portal](https://manage.windowsazure.com/) on the application registration page.  When a user signs into the application, AAD emits a Role Claim for each role that has been granted based on the user and their group membership.  Assignment of users and groups to roles can be done through the portal's UI, or programatically using the [AAD Graph API](http://msdn.microsoft.com/en-us/library/azure/hh974476.aspx).  In this sample, application role management is done through the Azure Portal.
 
 Using RBAC with Application Roles and Role Claims, this application securely enforces authorization policies with minimal effort on the part of the developer.
 
@@ -53,10 +53,10 @@ This sample is already registered in a Microsoft tenant as a multi-tenant applic
 1. Run the app in Visual Studio and sign in as a user in your AAD tenant, granting consent when prompted to do so.
 2. In the [Azure management portal](https://manage.windowsazure.com), navigate to your tenant by clicking on Active Directory in the left hand nav and selecting the appropriate tenant.
 3. Click the "Applications" tab, and locate the newly created entry for "WebApp-RoleClaims-DotNet." Click on it.
-4. On the following page, click on the "Users" tab.  Select a user, click the "Assign" button in the bottom tray, and assign the user the "Admin" role.  This will enable the user to access the "Roles" page in the sample application.
-5. Sign out of the sample application, and sign back in as the user you've just assigned to the "Admin" role.
+4. On the following page, click on the "Users" tab.  Select any user, click the "Assign" button in the bottom tray, and assign the user to an Application Role.  Repeat this process for any users you would like to have access to Tasks in the application.
+5. Sign out of the sample application and sign back in.
 
-Explore the application by assigning various users and groups to roles via the "Roles" page. Login as users in different roles, and notice the differences in functionality available to each.  Only Admins have access to the "Roles" page, and each role has different capabilities on the "Tasks" page, as described above.
+Explore the application by assigning various users and groups to roles via Azure Portal. Login as users in different roles, and notice the differences in functionality available to each.  Each role has different capabilities on the "Tasks" page, as described above.
 
 ## How To Run The Sample as a Single Tenant App
 
@@ -112,7 +112,7 @@ This section explains how to register the application as a single tenant applica
 
 ### Step 4:  Run the sample
 
-Clean the solution, rebuild the solution, and run it!  Explore the sample by signing in, navigating to different pages, adding tasks, signing out, etc.  Create several user accounts in the Azure Management Portal, and assign them different roles by navigating to the "Users" tab of your application in the Azure Portal.  You will need to assign users to the Admin role in order to view the Roles page of the application.  Create a Security Group in the Azure Management Portal, add users to it, and again add roles to it using an Admin account.  Explore the differences between each role throughout the application, namely the Tasks and Roles pages.
+Clean the solution, rebuild the solution, and run it!  Explore the sample by signing in, navigating to different pages, adding tasks, signing out, etc.  Create several user accounts in the Azure Management Portal, and assign them different roles by navigating to the "Users" tab of your application in the Azure Portal.  Create a Security Group in the Azure Management Portal, add users to it, and again add roles to it using an Admin account.  Explore the differences between each role throughout the application, namely the Tasks page.
 
 ## Deploy this Sample to Azure
 
