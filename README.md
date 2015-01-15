@@ -42,11 +42,7 @@ From your shell or command line:
 
 `git clone https://github.com/AzureADSamples/WebApp-RoleClaims-DotNet.git`
 
-### Step 2:  Create a user account in your Azure Active Directory tenant
-
-This sample will not work with a Microsoft account, so if you signed in to the Azure portal with a Microsoft account and have never created a user account in your directory before, you need to do so now. If you create an account and want to use it to sign-in to the Azure portal, don't forget to add the user account as a co-administrator of your Azure subscription.
-
-### Step 3: Run the Sample
+### Step 2: Run the Sample
 
 This sample is already registered in a Microsoft tenant as a multi-tenant application that can run out of the box with your tenant by following these steps:
 
