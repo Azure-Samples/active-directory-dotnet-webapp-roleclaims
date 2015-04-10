@@ -50,7 +50,7 @@ namespace WebApp_RoleClaims_DotNet
                     // to be run out-of-the-box.  For a real multi-tenant app, reference the issuer validation in 
                     // WebApp-MultiTenant-OpenIDConnect-DotNet.  If you're running this sample as a single-tenant
                     // app, you can delete the ValidateIssuer property below.
-                    TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters 
+                    TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
                     {
                         ValidateIssuer = false, // For Multi-Tenant Only
                         RoleClaimType = "roles",
@@ -61,23 +61,23 @@ namespace WebApp_RoleClaims_DotNet
                         AuthorizationCodeReceived = context =>
                         {
                             // Get Access Token for User's Directory
-                            try
-                            {
-                                string userObjectId = context.AuthenticationTicket.Identity.FindFirst(Globals.ObjectIdClaimType).Value;
-                                string tenantId = context.AuthenticationTicket.Identity.FindFirst(Globals.TenantIdClaimType).Value;
-                                ClientCredential credential = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
-                                AuthenticationContext authContext = new AuthenticationContext(
-                                    String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantId),
-                                    new TokenDbCache(userObjectId));
-                                AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(
-                                    context.Code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)),
-                                    credential, ConfigHelper.GraphResourceId);
-                            }
-                            catch (AdalException)
-                            {
-                                context.HandleResponse();
-                                context.Response.Redirect("/Error/ShowError?errorMessage=Were having trouble signing you in&signIn=true");
-                            }
+                            string userObjectId = context.AuthenticationTicket.Identity.FindFirst(Globals.ObjectIdClaimType).Value;
+                            string tenantId = context.AuthenticationTicket.Identity.FindFirst(Globals.TenantIdClaimType).Value;
+                            ClientCredential credential = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
+                            AuthenticationContext authContext = new AuthenticationContext(
+                                String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantId),
+                                new TokenDbCache(userObjectId));
+                            AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(
+                                context.Code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)),
+                                credential, ConfigHelper.GraphResourceId);
+
+                            return Task.FromResult(0);
+                        },
+
+                        AuthenticationFailed = context =>
+                        {
+                            context.HandleResponse();
+                            context.Response.Redirect("/Error/ShowError?signIn=true&errorMessage=" + context.Exception.Message);
                             return Task.FromResult(0);
                         }
                     }
