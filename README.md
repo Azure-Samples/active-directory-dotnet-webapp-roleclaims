@@ -52,7 +52,7 @@ From your shell or command line:
 
 This sample is already registered in a Microsoft tenant as a multi-tenant application that can run out of the box with your tenant by following these steps:
 
-1. Run the app in Visual Studio and sign in as a user in your AAD tenant, granting consent when prompted to do so.
+1. Run the app in Visual Studio and sign in as a user in your AAD tenant, granting consent when prompted to do so.  NOTE: you can't use an MSA guest user account to sign in - it must be a user that you created in your tenant.
 2. In the [Azure management portal](https://manage.windowsazure.com), navigate to your tenant by clicking on Active Directory in the left hand nav and selecting the appropriate tenant.
 3. Click the "Applications" tab, and locate the newly created entry for "WebApp-RoleClaims-DotNet." Click on it.
 4. On the following page, click on the "Users" tab.  Select any user, click the "Assign" button in the bottom tray, and assign the user to an Application Role.  Repeat this process for any users you would like to have access to Tasks in the application.
