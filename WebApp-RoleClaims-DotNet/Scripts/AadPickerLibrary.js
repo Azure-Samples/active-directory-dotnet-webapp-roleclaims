@@ -1,4 +1,4 @@
-﻿function AadPicker(searchUrl, maxResultsPerPage, input, token, tenant) {
+function AadPicker(maxResultsPerPage, input, token, tenant) {
 
         // Inputs
         var resultsPerPage = maxResultsPerPage / 2;
@@ -18,7 +18,7 @@
 
         // Constants
         var graphLoc = "https://graph.windows.net";
-        var apiVersion = "1.22-preview";
+        var apiVersion = "1.5";
 
         // UI Labels
         var userLabel = "";
@@ -74,14 +74,10 @@
         function SendQuery(graphQuery) {
 
             return $.ajax({
-                url: searchUrl,
-                type: "POST",
-                data: {
-                    token: token,
-                    query: graphQuery
-                },
-                beforeSend: function (jqxhr, settings) {
-                    jqxhr.overrideMimeType("application/json");
+                url: graphQuery,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token,
                 }
             });
         }
