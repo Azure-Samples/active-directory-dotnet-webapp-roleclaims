@@ -110,7 +110,7 @@ This section explains how to register the application as a single tenant applica
 5. Find the app key `ida:AppKey` and replace the value with the key for the application from the Azure portal.
 6. Find the app key `ida:Tenant` and replace the value with the domain of your tenant.
 6. If you changed the base URL of the TodoListWebApp sample, find the app key `ida:PostLogoutRedirectUri` and replace the value with the new base URL of the sample.
-7. In `Startup.Auth.cs`, comment out or delete the lines corresponding to the multi-tenant version of the sample, which are marked by comments.  You'll have to change the value for the `Authority` to the single-tenant version, and delete the lines relating to `TokenValidationParameters`.
+7. In `Startup.Auth.cs`, comment out or delete the lines corresponding to the multi-tenant version of the sample, which are marked by comments.  You'll have to change the value for the `Authority` to the single-tenant version, and delete the line relating to "ValidateIssuer"" in "TokenValidationParameters".
 
 ### Step 4:  Run the sample
 
