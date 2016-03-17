@@ -79,14 +79,17 @@ namespace WebApp_RoleClaims_DotNet.Utils
             // if state changed
             if (this.HasStateChanged)
             {
-                Cache = new TokenCacheEntry
+                if (Cache == null)
                 {
-                    userObjId = userObjId,
-                    cacheBits = this.Serialize(),
-                    LastWrite = DateTime.Now
-                };
+                    Cache = new TokenCacheEntry();
+                }
+
+                Cache.userObjId = userObjId;
+                Cache.cacheBits = this.Serialize();
+                Cache.LastWrite = DateTime.Now;
+
                 //// update the DB and the lastwrite                
-                db.Entry(Cache).State = Cache.TokenCacheEntryID == 0 ? EntityState.Added : EntityState.Modified;                
+                db.Entry(Cache).State = Cache.TokenCacheEntryID == 0 ? EntityState.Added : EntityState.Modified;
                 db.SaveChanges();
                 this.HasStateChanged = false;
             }
