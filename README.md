@@ -52,7 +52,7 @@ From your shell or command line:
 
 This sample is already registered in a Microsoft tenant as a multi-tenant application that can run out of the box with your tenant by following these steps:
 
-1. Run the app in Visual Studio and sign in as a user in your AAD tenant, granting consent when prompted to do so.
+1. Run the app in Visual Studio and sign in as a user in your AAD tenant, granting consent when prompted to do so.  NOTE: you can't use an MSA guest user account to sign in - it must be a user that you created in your tenant.
 2. In the [Azure management portal](https://manage.windowsazure.com), navigate to your tenant by clicking on Active Directory in the left hand nav and selecting the appropriate tenant.
 3. Click the "Applications" tab, and locate the newly created entry for "WebApp-RoleClaims-DotNet." Click on it.
 4. On the following page, click on the "Users" tab.  Select any user, click the "Assign" button in the bottom tray, and assign the user to an Application Role.  Repeat this process for any users you would like to have access to Tasks in the application.
@@ -110,7 +110,7 @@ This section explains how to register the application as a single tenant applica
 5. Find the app key `ida:AppKey` and replace the value with the key for the application from the Azure portal.
 6. Find the app key `ida:Tenant` and replace the value with the domain of your tenant.
 6. If you changed the base URL of the TodoListWebApp sample, find the app key `ida:PostLogoutRedirectUri` and replace the value with the new base URL of the sample.
-7. In `Startup.Auth.cs`, comment out or delete the lines corresponding to the multi-tenant version of the sample, which are marked by comments.  You'll have to change the value for the `Authority` to the single-tenant version, and delete the lines relating to `TokenValidationParameters`.
+7. In `Startup.Auth.cs`, comment out or delete the lines corresponding to the multi-tenant version of the sample, which are marked by comments.  You'll have to change the value for the `Authority` to the single-tenant version, and delete the line relating to `ValidateIssuer` in `TokenValidationParameters`.
 
 ### Step 4:  Run the sample
 
