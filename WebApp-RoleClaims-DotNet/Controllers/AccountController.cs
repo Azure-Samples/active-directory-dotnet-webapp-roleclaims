@@ -3,7 +3,6 @@ using System.Web.Mvc;
 
 //The following libraries were added to this sample.
 using System;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
@@ -39,16 +38,6 @@ namespace WebApp_RoleClaims_DotNet.Controllers
             // Remove all cache entries for this user and send an OpenID Connect sign-out request.
             if (Request.IsAuthenticated)
             {
-                Claim userObjectIdClaim = ClaimsPrincipal.Current.FindFirst(Globals.ObjectIdClaimType);
-                Claim tenantIdClaim = ClaimsPrincipal.Current.FindFirst(Globals.TenantIdClaimType);
-                if (userObjectIdClaim != null && tenantIdClaim != null)
-                {
-                    var authContext = new AuthenticationContext(
-                        String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantIdClaim.Value),
-                        new TokenDbCache(userObjectIdClaim.Value));
-                    authContext.TokenCache.Clear();
-                }
-
                 HttpContext.GetOwinContext().Authentication.SignOut(
                     OpenIdConnectAuthenticationDefaults.AuthenticationType, CookieAuthenticationDefaults.AuthenticationType);
             }
