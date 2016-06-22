@@ -42,5 +42,11 @@ namespace WebApp_RoleClaims_DotNet.Controllers
                     OpenIdConnectAuthenticationDefaults.AuthenticationType, CookieAuthenticationDefaults.AuthenticationType);
             }
         }
+        
+        public void EndSession()
+        {
+            // If AAD sends a single sign-out message to the app, end the user's session, but don't redirect to AAD for sign out.
+            HttpContext.GetOwinContext().Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
+        }
     }
 }
