@@ -12,6 +12,5 @@ namespace WebApp_RoleClaims_DotNet.DAL
         public RoleClaimContext() : base("RoleClaimContext") { }
 
         public DbSet<Task> Tasks { get; set; }
-        public DbSet<TokenCacheEntry> TokenCacheEntries { get; set; }
     }
 }

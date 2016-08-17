@@ -5,7 +5,6 @@ using System.Web;
 using System.Web.Mvc;
 
 //The following libraries were added to this sample.
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using WebApp_RoleClaims_DotNet.Utils;
 using System.Security.Claims;
 using Microsoft.Azure.ActiveDirectory.GraphClient;

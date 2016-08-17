@@ -5,7 +5,6 @@ using System.Collections.Generic;
 //The following libraries were added to this sample.
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
 using Microsoft.Owin.Security;
@@ -58,22 +57,6 @@ namespace WebApp_RoleClaims_DotNet
 
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
-                        AuthorizationCodeReceived = context =>
-                        {
-                            // Get Access Token for User's Directory
-                            string userObjectId = context.AuthenticationTicket.Identity.FindFirst(Globals.ObjectIdClaimType).Value;
-                            string tenantId = context.AuthenticationTicket.Identity.FindFirst(Globals.TenantIdClaimType).Value;
-                            ClientCredential credential = new ClientCredential(ConfigHelper.ClientId, ConfigHelper.AppKey);
-                            AuthenticationContext authContext = new AuthenticationContext(
-                                String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, tenantId),
-                                new TokenDbCache(userObjectId));
-                            AuthenticationResult result = authContext.AcquireTokenByAuthorizationCode(
-                                context.Code, new Uri(HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path)),
-                                credential, ConfigHelper.GraphResourceId);
-
-                            return Task.FromResult(0);
-                        },
-
                         AuthenticationFailed = context =>
                         {
                             context.HandleResponse();

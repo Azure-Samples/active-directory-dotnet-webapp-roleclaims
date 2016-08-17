@@ -11,6 +11,8 @@ This sample shows how to build an MVC web application that uses Azure AD Applica
 
 For more information about how the protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).
 
+> Looking for previous versions of this code sample? Check out the tags on the [releases](../../releases) GitHub page.
+
 ##About The Sample
 
 This MVC 5 web application is a simple "Task Tracker" application that allows users to create, read, update, and delete tasks.  Within the application, access to certain functionality is restricted to subsets of users. For instance, not every user has the ability to create a task.
@@ -75,8 +77,11 @@ This section explains how to register the application as a single tenant applica
 7. Enter a friendly name for the application, for example "TaskTrackerWebApp", select "Web Application and/or Web API", and click next.
 8. For the sign-on URL, enter the base URL for the sample, which is by default `https://localhost:44322/`.  NOTE:  It is important, due to the way Azure AD matches URLs, to ensure there is a trailing slash on the end of this URL.  If you don't include the trailing slash, you will receive an error when the application attempts to redeem an authorization code.
 9. For the App ID URI, enter `https://<your_tenant_name>/<your_application_name>`, replacing `<your_tenant_name>` with the name of your Azure AD tenant and `<your_application_name>` with the name you chose above.  Click OK to complete the registration.
-10. While still in the Azure portal, click the Configure tab of your application.
-11. Find the Client ID value and copy it aside, you will need this later when configuring your application.
+1. While still in the Azure portal, click the **Configure** tab of your application.
+2. Locate the **Manage Manifest** button in the bottom drawer.  Click it and download your application's manifest as a `.json` file.
+3. Open the `.json` file in a text editor and change the `logoutUrl` property to `https://localhost:44322/Account/EndSession`.  This is the default single sign out URL for this sample.
+4. Back in the Azure portal, click **Manage Manifest** then **Upload Manifest**, and upload your updated `.json` file.
+5. Locate the **Client ID** value in the **Configure** tab and copy it to your clipboard.  You will need it shortly.
 12. Create a new key for the application.  Save the configuration so you can view the key value.  Save this key aside, you'll need it shortly as well.
 13. In the Permissions to Other Applications configuration section, ensure that both "Access your organization's directory" and "Enable sign-on and read user's profiles" are selected under "Delegated permissions" for "Azure Active Directory"  Save the configuration.
 
@@ -142,7 +147,7 @@ This section explains how to register the application as a single tenant applica
 5. Find the app key `ida:AppKey` and replace the value with the key for the application from the Azure portal.
 6. Find the app key `ida:Tenant` and replace the value with the domain of your tenant.
 6. If you changed the base URL of the TodoListWebApp sample, find the app key `ida:PostLogoutRedirectUri` and replace the value with the new base URL of the sample.
-7. In `Startup.Auth.cs`, comment out or delete the lines corresponding to the multi-tenant version of the sample, which are marked by comments.  You'll have to change the value for the `Authority` to the single-tenant version, and delete the lines relating to `TokenValidationParameters`.
+7. In `Startup.Auth.cs`, comment out or delete the lines corresponding to the multi-tenant version of the sample, which are marked by comments.  You'll have to change the value for the `Authority` to the single-tenant version, and delete the line relating to `ValidateIssuer` in `TokenValidationParameters`.
 
 ### Step 4:  Run the sample
 
