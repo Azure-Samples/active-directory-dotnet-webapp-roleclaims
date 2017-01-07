@@ -86,18 +86,50 @@ This section explains how to register the application as a single tenant applica
 ```JSON
 "appRoles": [
     {
-      "allowedMemberTypes": [
-        "User"
-      ],
-      "description": "Admins can manage roles and perform all task actions.",
-      "displayName": "Admin",
-      "id": "81e10148-16a8-432a-b86d-ef620c3e48ef",
-      "isEnabled": true,
-      "origin": "Application",
-      "value": "Admin"
+        "allowedMemberTypes": [
+            "User"
+        ],
+        "description": "Admins can manage roles and perform all task actions.",
+        "displayName": "Admin",
+        "id": "81e10148-16a8-432a-b86d-ef620c3e48ef",
+        "isEnabled": true,
+        "origin": "Application",
+        "value": "Admin"
     },
-    <<<< Approver, Observer, & Writer roles go here >>>>
-  ],
+    {
+        "allowedMemberTypes": [
+            "User"
+        ],
+        "description": "Approvers can change the status of an existing task, but cannot add a new task.",
+        "displayName": "Approver",
+        "id": "86ea7495-44bd-4f23-8ee1-b2fdc7bb0735",
+        "isEnabled": true,
+        "origin": "Application",
+        "value": "Approver"
+    },
+    {
+        "allowedMemberTypes": [
+            "User"
+        ],
+        "description": "Observers can only read the tasks and their statuses.",
+        "displayName": "Observer",
+        "id": "42d3e6fb-2255-4fc9-97ec-7cf2dc8117e9",
+        "isEnabled": true,
+        "origin": "Application",
+        "value": "Observer"
+    },
+    {
+        "allowedMemberTypes": [
+            "User"
+        ],
+        "description": "Writers can add new tasks, but cannot change the status of an existing task.",
+        "displayName": "Writer",
+        "id": "c4b84e95-2af9-45f9-8da1-11c597079e0d",
+        "isEnabled": true,
+        "origin": "Application",
+        "value": "Writer"
+    }
+],
 ```
 
 ### Step 3:  Configure the sample to use your Azure AD tenant
