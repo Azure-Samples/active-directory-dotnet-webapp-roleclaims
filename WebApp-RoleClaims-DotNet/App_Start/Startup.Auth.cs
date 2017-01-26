@@ -1,24 +1,16 @@
-﻿using Owin;
+﻿// #define SingleTenantApp
 using System;
-using System.Collections.Generic;
+using System.Globalization;
 
-//The following libraries were added to this sample.
+//The following namespace was added to this sample.
 using System.Threading.Tasks;
-using System.Web;
+using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
-using Microsoft.Owin.Security;
+using Owin;
 
-//The following libraries were defined and added to this sample.
+//The following namespace was defined and added to this sample.
 using WebApp_RoleClaims_DotNet.Utils;
-using System.Security.Claims;
-using Newtonsoft.Json;
-using System.Globalization;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net;
-using Microsoft.Azure.ActiveDirectory.GraphClient;
-using Microsoft.Azure.ActiveDirectory.GraphClient.Extensions;
 
 
 namespace WebApp_RoleClaims_DotNet
@@ -40,8 +32,11 @@ namespace WebApp_RoleClaims_DotNet
                 new OpenIdConnectAuthenticationOptions
                 {
                     ClientId = ConfigHelper.ClientId,
-                    //Authority = String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, ConfigHelper.Tenant), // For Single-Tenant
+#if SingleTenantApp
+                    Authority = String.Format(CultureInfo.InvariantCulture, ConfigHelper.AadInstance, ConfigHelper.Tenant), // For Single-Tenant
+#else
                     Authority = ConfigHelper.CommonAuthority, // For Multi-Tenant
+#endif
                     PostLogoutRedirectUri = ConfigHelper.PostLogoutRedirectUri,
 
                     // Here, we've disabled issuer validation for the multi-tenant sample.  This enables users
@@ -51,7 +46,9 @@ namespace WebApp_RoleClaims_DotNet
                     // app, you can delete the ValidateIssuer property below.
                     TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
                     {
+#if !SingleTenantApp
                         ValidateIssuer = false, // For Multi-Tenant Only
+#endif
                         RoleClaimType = "roles",
                     },
 
