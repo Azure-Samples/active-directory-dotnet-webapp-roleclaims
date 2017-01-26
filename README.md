@@ -102,9 +102,13 @@ This section explains how to register the application as a single tenant applica
 
 ### Step 2: Define your Application Roles
 
-1. While still in the blade for your  application, click " Manifest".
-2. Edit the downloaded manifest by locating the "appRoles" setting and adding all four Application Roles.  The role definitions are provided in the JSON block below.  Leave the allowedMemberTypes to "User" only.  Each role definition in this manifest must have a different valid Guid for the "id" property. Note that the "value" propertu of each role is set to the exact strings "Admin", "Approver", "Observer", and "Writer" (as these strings are used in the code in the application)
-3. Save the edited manifest using the same "Save" button in the portal.
+1. While still in the blade for your  application, click **Manifest**.
+2. Edit the manifest by locating the "appRoles" setting and adding all four Application Roles.  The role definitions are provided in the JSON block below.  Leave the allowedMemberTypes to "User" only.  Each role definition in this manifest must have a different valid Guid for the "id" property. Note that the "value" propertu of each role is set to the exact strings "Admin", "Approver", "Observer", and "Writer" (as these strings are used in the code in the application). 
+To do this replacement in the manifest, you have two options:
+    - Option 1: Edit the manifest in place by clicking **Edit**, replacing the appRoles value, and then clicking **Save**. 
+    - Option 2: **Download** the manifest to your computer, edit it with your favorite text editor, save a copy of it, and **Upload** this copy. You might want to choose this option if you want to keep track of the history of the manifest.
+
+The content of `appRoles` should be the following (the `ìd` can be any unique GUID)
 ```JSON
 "appRoles": [
     {
@@ -159,7 +163,7 @@ This section explains how to register the application as a single tenant applica
 6. Find the app key `ida:Tenant` and replace the value with the domain of your tenant.
 6. If you changed the base URL of the TodoListWebApp sample, find the app key `ida:PostLogoutRedirectUri` and replace the value with the new base URL of the sample.
 7. In `Startup.Auth.cs`, comment out the fist line: `// #define SingleTenantApp`. 
-Indeed, the code you cloned corresponds to the multi-tenant version of the sample, and we use conditional compilation to include or exclude the corresponding lines of code which are marked by comments. 
+Indeed, the code you cloned corresponds to the multi-tenant version of the sample. We use conditional compilation to include or exclude the corresponding lines of code which are marked by comments. 
 The effect of uncommenting this first line will be have to change the value for the `Authority` to the single-tenant version, and omit the line relating to `ValidateIssuer` in `TokenValidationParameters`.
 
 ### Step 4:  Run the sample

@@ -1,13 +1,13 @@
 ﻿// #define SingleTenantApp
 using System;
-using System.Globalization;
 
 //The following namespace was added to this sample.
 using System.Threading.Tasks;
-using Microsoft.Owin.Security;
+using System.Globalization;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
+using Microsoft.Owin.Security;
 
 //The following namespace was defined and added to this sample.
 using WebApp_RoleClaims_DotNet.Utils;
