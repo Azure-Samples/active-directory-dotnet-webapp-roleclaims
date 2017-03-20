@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp-RoleClaims-DotNet", "WebApp-RoleClaims-DotNet\WebApp-RoleClaims-DotNet.csproj", "{BF85A21D-737E-4231-BC48-911F3F3123E8}"
 EndProject
@@ -10,6 +10,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{38C3B2
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{67D3444F-44B3-41B3-AC1C-4973E051C1CD}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Automation", "Automation", "{34F47CCF-D996-480A-8329-4101072A4E03}"
+	ProjectSection(SolutionItems) = preProject
+		AppRoles.json = AppRoles.json
+		Cleanup.ps1 = Cleanup.ps1
+		Config.ps1 = Config.ps1
+		Configure.ps1 = Configure.ps1
 	EndProjectSection
 EndProject
 Global
