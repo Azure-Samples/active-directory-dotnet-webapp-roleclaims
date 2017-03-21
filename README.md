@@ -46,7 +46,7 @@ For more details about when you want to use a single tenant or a multi-tenant ap
 
 ### Prerequisites
 To run this sample you will need:
-- Visual Studio 2013. You can also use more recent versions of Visual Studio (we explain below the line of configuration to change)
+- Visual Studio 2015 or later. You can also use older versions of Visual Studio (we explain below the line of configuration to change)
 - An Internet connection
 - An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, please see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/) 
 - A user account in your Azure AD tenant. In the first case (run as a multi-tenant application), this sample will **not** work with **a Microsoft account**, so if you signed in to the Azure portal with a Microsoft account and have never created a user account in your directory before, you need to do that now. 
@@ -59,12 +59,12 @@ From your shell or command line:
 
 `git clone https://github.com/Azure-Samples/active-directory-dotnet-webapp-authz-roleclaims.git`
 
-### Step 2: If you use Visual Studio 2015 or later, update the connection string
-If you are using Visual Studio 2013, the sample will run as is. If you are using Visual Studio 2015 or later, you will need to change the `Data Source` portion of the `connectionString` in the `Web.Config` file from `Data Source=(LocalDb)\v11.0;` to `Data Source=(LocalDb)\MSSQLLocalDB;`
+### Step 2: If you use Visual Studio 2013 or earlier, update the connection string
+If you are using Visual Studio 2015 or later, the sample will run as is. If you are using Visual Studio 2013 or earlier, you will need to change the `Data Source` portion of the `connectionString` in the `Web.Config` file from `Data Source=(LocalDb)\MSSQLLocalDB;` to `Data Source=(LocalDb)\v11.0;`
 The line should therefore be something like this:
 ```
   <connectionStrings>
-    <add name="RoleClaimContext" connectionString="Data Source=(LocalDb)\MSSQLLocalDB;Initial Catalog=WebApp_RoleClaims_DotNet;Integrated Security=SSPI;AttachDBFilename=|DataDirectory|\WebApp_RoleClaims_DotNet.mdf;" providerName="System.Data.SqlClient" />
+    <add name="RoleClaimContext" connectionString="Data Source=(LocalDb)\v11.0;Initial Catalog=WebApp_RoleClaims_DotNet;Integrated Security=SSPI;AttachDBFilename=|DataDirectory|\WebApp_RoleClaims_DotNet.mdf;" providerName="System.Data.SqlClient" />
   </connectionStrings>
   ```
 
