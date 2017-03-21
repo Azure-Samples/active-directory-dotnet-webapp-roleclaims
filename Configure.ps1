@@ -44,6 +44,9 @@ Function ReplaceSetting([string] $configFilePath, [string] $key, [string] $newVa
    $content.save($configFilePath)
 }
 
+
+
+
 # Updates the config file for a client application
 Function UpdateSampleConfigFile([string] $configFilePath, [string] $tenantId, [string] $clientId, [string] $appKey, [string] $baseAddress)
 {
@@ -60,6 +63,7 @@ Function UpdateServiceConfigFile([string] $configFilePath, [string] $tenantId, [
     ReplaceSetting -configFilePath $configFilePath -key "ida:Audience" -newValue $audience
 }
 
+# Create an application role of given name and description
 Function CreateAppRole([string] $Name, [string] $Description)
 {
     $appRole = New-Object Microsoft.Open.AzureAD.Model.AppRole
@@ -73,7 +77,9 @@ Function CreateAppRole([string] $Name, [string] $Description)
     return $appRole
 }
 
-# [System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.ResourceAccess]] 
+# Adds the requiredAccesses (expressed as a pipe separated string) to the requiredAccess structure
+# The exposed permissions are in the $exposedPermissions collection, and the type of permission (Scope | Role) is 
+# described in $permissionType
 Function AddResourcePermission($requiredAccess, `
                                $exposedPermissions, [string]$requiredAccesses, [string]$permissionType)
 {
@@ -118,27 +124,7 @@ Function GetRequiredPermissions([string] $applicationDisplayName, [string] $requ
     return $requiredAccess
 }
 
-# borrowed from https://gist.github.com/ctigeek/2a56648b923d198a6e60
-function Create-AesManagedObject($key, $IV) { 
-    if ($IV) {
-        if ($IV.getType().Name -eq "String") {
-            $aesManaged.IV = [System.Convert]::FromBase64String($IV)
-        }
-        else {
-            $aesManaged.IV = $IV
-        }
-    }
-    if ($key) {
-        if ($key.getType().Name -eq "String") {
-            $aesManaged.Key = [System.Convert]::FromBase64String($key)
-        }
-        else {
-            $aesManaged.Key = $key
-        }
-    }
-    $aesManaged
-}
-
+# Create a password that can be used as an application key
 Function ComputePassword
 {
     $aesManaged = New-Object "System.Security.Cryptography.AesManaged"
@@ -150,12 +136,23 @@ Function ComputePassword
     return [System.Convert]::ToBase64String($aesManaged.Key)
 }
 
+# Create an application key
 # See https://www.sabin.io/blog/adding-an-azure-active-directory-application-and-key-using-powershell/
 Function CreateAppKey([DateTime] $fromDate, [int] $durationInYears, [string]$pw)
 {
     $endDate = $fromDate.AddYears($durationInYears) 
     $keyId = (New-Guid).ToString();
     $key = New-Object Microsoft.Open.AzureAD.Model.PasswordCredential($null, $fromDate, $keyId, $endDate, $pw) 
+}
+
+Function CreateUserRepresentingAppRole([string]$appName, $role, [string]$tenantName)
+{
+    $password = "test123456789."
+    $displayName=$appName+"-"+$role.Value
+    $userEmail = $displayName+"@"+$tenantName
+    $nickName=$role.Value
+    $passwordProfile = New-Object Microsoft.Open.AzureAD.Model.PasswordProfile($password, $false, $false)
+    New-AzureADUser -DisplayName $displayName -PasswordProfile $passwordProfile -AccountEnabled $true -MailNickName $nickName -UserPrincipalName $userEmail
 }
 
 Function ConfigureApplications
@@ -206,7 +203,7 @@ so that they are consistent with the Applications parameters
     . .\Config.ps1
     $homePage = $homePage + "/"
 
-    # Application Roles
+    # Add application Roles
     $writerRole = CreateAppRole -Name "Writer" -Description "Writers Have the ability to create tasks."
     $observerRole = CreateAppRole -Name "Observer"  -Description "Observers only have the ability to view tasks and their statuses"
     $approverRole = CreateAppRole -Name "Approver" -Description  "Approvers have the ability to change the status of tasks."
@@ -218,7 +215,7 @@ so that they are consistent with the Applications parameters
     $appRoles.Add($approverRole)
     $appRoles.Add($adminRole)
 
-    # RequiredResourcesAccess
+    # Add Required Resources Access (MicrosoftGraph)
     $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
     $microsoftGraphRequiredPermissions = GetRequiredPermissions -applicationDisplayName "Microsoft Graph" `
                                                                 -requiredDelegatedPermissions "Directory.Read.All|User.Read";
@@ -231,7 +228,7 @@ so that they are consistent with the Applications parameters
     $appKey = $pw
 
     # Create the Azure Active Directory Application and it's service principal
-    Write-Host "Creating the AAD appplication ($appName)"
+    Write-Host "Creating the AAD appplication ($appName) with 4 roles and accessing Microsoft.Graph"
     $aadApplication = New-AzureADApplication -DisplayName $appName `
                                              -HomePage $homePage `
                                              -ReplyUrls $homePage `
@@ -252,6 +249,35 @@ so that they are consistent with the Applications parameters
                             -tenantId $tenantId `
                             -baseAddress $homePage
 
+    # Update the Startup.Auth.cs file to enable a single-tenant application
+
+
+    # Create
+    # ------
+    # Make sure that the user who created the application is an admin of the application
+    $userPrincipal = $creds.Account.Id
+    Write-Host "Enable '$userPrincipal' as an 'admin' of the application"
+    $user = Get-AzureADUser -Filter "UserPrincipalName eq '$userPrincipal'"
+    $userAssignment = New-AzureADUserAppRoleAssignment -ObjectId $user.ObjectId -PrincipalId $user.ObjectId -ResourceId $servicePrincipal.ObjectId -Id $adminRole.Id
+
+    # Creating an Approver
+    Write-Host "Adding an approver user"
+    $anApprover = CreateUserRepresentingAppRole $appName $approverRole $tenantName
+    $userAssignment = New-AzureADUserAppRoleAssignment -ObjectId $anApprover.ObjectId -PrincipalId $anApprover.ObjectId -ResourceId $servicePrincipal.ObjectId -Id $approverRole.Id
+    Write-Host "Created "($anApprover.UserPrincipalName)" with password 'test123456789.'"
+
+    # Creating an Observer
+    Write-Host "Adding an observer user"
+    $anObserver = CreateUserRepresentingAppRole $appName $observerRole $tenantName
+    $userAssignment = New-AzureADUserAppRoleAssignment -ObjectId $anObserver.ObjectId -PrincipalId $anObserver.ObjectId -ResourceId $servicePrincipal.ObjectId -Id $observerRole.Id
+    Write-Host "Created "($anObserver.UserPrincipalName)" with password 'test123456789.'"
+
+    # Creating a Writer
+    Write-Host "Adding a writer user"
+    $aWriter = CreateUserRepresentingAppRole $appName $writerRole $tenantName
+    $userAssignment = New-AzureADUserAppRoleAssignment -ObjectId $aWriter.ObjectId -PrincipalId $aWriter.ObjectId -ResourceId $servicePrincipal.ObjectId -Id $writerRole.Id
+    Write-Host "Created "($aWriter.UserPrincipalName)" with password 'test123456789.'"
+
     # Completes
     Write-Host "Done."
    }
@@ -259,6 +285,7 @@ so that they are consistent with the Applications parameters
 
 # Run interactively (will ask you for the tenant ID)
 ConfigureApplications -Credential $Credential -tenantId $TenantId
+
 
 # you can also provide the tenant ID and the credentials
 # $tenantId = "ID of your AAD directory"
