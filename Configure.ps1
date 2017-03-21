@@ -155,6 +155,16 @@ Function CreateUserRepresentingAppRole([string]$appName, $role, [string]$tenantN
     New-AzureADUser -DisplayName $displayName -PasswordProfile $passwordProfile -AccountEnabled $true -MailNickName $nickName -UserPrincipalName $userEmail
 }
 
+Function UnCommentSingleTenantAppConditionalDirective($file)
+{
+    $lines = [System.IO.File]::ReadAllLines($file)
+    if ($lines[0].Contains("#define SingleTenantApp") -And $lines[0].StartsWith("// "))
+    {
+        $lines[0] = $lines[0].Replace("// ", "")
+        [System.IO.File]::WriteAllLines($file, $lines)
+    }
+}
+
 Function ConfigureApplications
 {
 <#
@@ -250,7 +260,9 @@ so that they are consistent with the Applications parameters
                             -baseAddress $homePage
 
     # Update the Startup.Auth.cs file to enable a single-tenant application
-
+    $file = "$pwd\WebApp-RoleClaims-DotNet\App_Start\Startup.Auth.cs"
+    Write-Host "Updating the code to run as a single tenant application: '"$file"''"
+    UnCommentSingleTenantAppConditionalDirective $file
 
     # Create
     # ------

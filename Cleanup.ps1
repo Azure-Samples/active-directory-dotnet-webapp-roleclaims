@@ -2,6 +2,16 @@ param([PSCredential]$Credential, [string]$TenantId)
 Import-Module AzureAD
 $ErrorActionPreference = 'Stop'
 
+Function RemoveUser([string]$alias)
+{
+    $userPrincipal = "$appName-$alias@$tenantName"
+    $user = Get-AzureADUser -Filter "UserPrincipalName eq '$userPrincipal'"
+    if ($user)
+    {
+        Write-Host "Removing User '($userPrincipal)'"
+        Remove-AzureADUser -ObjectId $user.ObjectId
+    }
+}
 
 Function Cleanup
 {
@@ -57,14 +67,22 @@ This function removes the Azure AD applications for the sample. These applicatio
     . .\Config.ps1
 
     # Removes the applications
-    Write-Host "Removing Application '$appIdURI' if needed"
+    Write-Host "Removing Application"
     $app=Get-AzureADApplication -Filter "identifierUris/any(uri:uri eq '$appIdURI')"  
     if ($app)
     {
+        Write-Host "Removing Application '$appIdURI'"
         Remove-AzureADApplication -ObjectId $app.ObjectId
     }
 
-       Write-Host "Done."
+
+    # Removes the users created for the application
+    Write-Host "Removing Users"
+    RemoveUser "Approver"
+    RemoveUser "Writer"
+    RemoveUser "Observer"
+    
+    Write-Host "Done."
    }
 }
 
