@@ -6,7 +6,7 @@
                 Hello, @User.Identity.Name!
             </li>
             <li>
-                @Html.ActionLink("Sign out", "SignOut", "Account")
+                @Html.ActionLink("Sign out", "SignOut", "Account", routeValues: null, htmlAttributes: new { id = "logoutLink" })
             </li>
         </ul>
     </text>
