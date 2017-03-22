@@ -32,12 +32,12 @@ namespace ScenarioTest
             HtmlDocument page = new HtmlDocument(browser);
             page.FilterProperties[HtmlDocument.PropertyNames.PageUrl] = url;
 
+
             // Sign in
             page = ClickSignInHyperLink(browser, page);
-            page = EnterCredentialsAndSignIn(browser, page, userLogin, userPassword);
-
-            // Accept consent (if necessary)
+            browser.WaitForControlReady();
             page = AcceptConsent(browser, page);
+            page = EnterCredentialsAndSignIn(browser, page, userLogin, userPassword);
 
 #if VerifyRole
             // Navigate to the About page and verify that the user has the right role
@@ -54,8 +54,11 @@ namespace ScenarioTest
             // Click the "Sign-out" Hyperlink
             HtmlHyperlink signOutHyperLink = new HtmlHyperlink(page);
             signOutHyperLink.SearchProperties[HtmlHyperlink.PropertyNames.Id] = "logoutLink";
-            signOutHyperLink.EnsureClickable();
-            Mouse.Click(signOutHyperLink);
+            if (signOutHyperLink.Exists)
+            {
+                signOutHyperLink.EnsureClickable();
+                Mouse.Click(signOutHyperLink);
+            }
         }
 
         private static void VerifyThatTheUserIsInRole(HtmlDocument page, string roleName)
