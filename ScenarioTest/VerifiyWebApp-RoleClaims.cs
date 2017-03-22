@@ -36,9 +36,14 @@ namespace ScenarioTest
             page = ClickSignInHyperLink(browser, page);
             page = EnterCredentialsAndSignIn(browser, page, userLogin, userPassword);
 
+            // Accept consent (if necessary)
+            page = AcceptConsent(browser, page);
+
+#if VerifyRole
             // Navigate to the About page and verify that the user has the right role
-            //page = NavigateToAboutPage(browser, page);
-            //VerifyThatTheUserIsInRole(page, role);
+            page = NavigateToAboutPage(browser, page);
+            VerifyThatTheUserIsInRole(page, role);
+#endif
 
             // Sign out
             SignOut(page);
@@ -71,6 +76,21 @@ namespace ScenarioTest
             aboutHyperlink.SearchProperties[HtmlHyperlink.PropertyNames.Id] = "about";
             aboutHyperlink.SearchProperties[HtmlHyperlink.PropertyNames.AbsolutePath] = "/Home/About";
             Mouse.Click(aboutHyperlink);
+            page = new HtmlDocument(browser);
+            return page;
+        }
+
+        private static HtmlDocument AcceptConsent(BrowserWindow browser, HtmlDocument page)
+        {
+            HtmlControl acceptConsentButton = new HtmlControl(page);
+            acceptConsentButton.SearchProperties[HtmlEdit.PropertyNames.Id] = "cred_accept_button";
+            acceptConsentButton.TryFind();
+            if (acceptConsentButton.Exists)
+            {
+                Mouse.Click(acceptConsentButton);
+            }
+
+            // Get the new page
             page = new HtmlDocument(browser);
             return page;
         }
