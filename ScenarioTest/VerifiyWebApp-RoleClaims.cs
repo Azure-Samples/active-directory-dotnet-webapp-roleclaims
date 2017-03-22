@@ -28,7 +28,7 @@ namespace ScenarioTest
         private void RunEndToEnd(string url, string userLogin, string userPassword, string role)
         {
             // Launch a brower
-            BrowserWindow browser = BrowserWindow.Launch(new Uri(url));
+            BrowserWindow browser = BrowserWindow.Launch(url, "-private");
             HtmlDocument page = new HtmlDocument(browser);
             page.FilterProperties[HtmlDocument.PropertyNames.PageUrl] = url;
 
@@ -77,7 +77,7 @@ namespace ScenarioTest
             // Click the "About" Hyperlink
             HtmlHyperlink aboutHyperlink = new HtmlHyperlink(page);
             aboutHyperlink.SearchProperties[HtmlHyperlink.PropertyNames.Id] = "about";
-            aboutHyperlink.SearchProperties[HtmlHyperlink.PropertyNames.AbsolutePath] = "/Home/About";
+            aboutHyperlink.WaitForControlExist();
             Mouse.Click(aboutHyperlink);
             page = new HtmlDocument(browser);
             return page;
