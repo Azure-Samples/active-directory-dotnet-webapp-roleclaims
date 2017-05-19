@@ -165,7 +165,7 @@ The content of `appRoles` should be the following (the `ìd` can be any unique G
 5. Find the app key `ida:AppKey` and replace the value with the key for the application from the Azure portal.
 6. Find the app key `ida:Tenant` and replace the value with the domain of your tenant.
 6. If you changed the base URL of the TodoListWebApp sample, find the app key `ida:PostLogoutRedirectUri` and replace the value with the new base URL of the sample.
-7. In `Startup.Auth.cs`, comment out the first line: `// #define SingleTenantApp`. 
+7. In `Startup.Auth.cs`, uncomment the first line: `// #define SingleTenantApp`. 
 Indeed, the code you cloned corresponds to the multi-tenant version of the sample. We use conditional compilation to include or exclude the corresponding lines of code which are marked by comments. 
 The effect of uncommenting this first line will be to change the value for the `Authority` to the single-tenant version, and omit the line relating to `ValidateIssuer` in `TokenValidationParameters`.
 
