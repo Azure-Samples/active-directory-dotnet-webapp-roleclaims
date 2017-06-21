@@ -1,7 +1,7 @@
 ---
 services: active-directory
 platforms: dotnet
-author: dstrockis
+author: jmprieur
 ---
 
 # Authorization in a web app using Azure AD application roles & role claims
