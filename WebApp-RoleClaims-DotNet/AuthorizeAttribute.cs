@@ -28,7 +28,7 @@ namespace WebApp_RoleClaims_DotNet
                         {
                             controller = "Error",
                             action = "ShowError",
-                            errorMessage = "You do not have sufficient priviliges to view this page."
+                            errorMessage = "You do not have sufficient privileges to view this page."
                         })
                     );
             }
