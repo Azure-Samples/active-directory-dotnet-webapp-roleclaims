@@ -7,7 +7,6 @@ author: jmprieur
 # Authorization in a web app using Azure AD application roles & role claims
 
 ![](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/38/badge)
-![](https://githuborgrepohealth.azurewebsites.net/api/TestBadge?id=4)
 
 This sample shows how to build an MVC web application that uses Azure AD Application Roles for authorization. Authorization in Azure AD can also be done with Azure AD Groups, as shown in [WebApp-GroupClaims-DotNet](https://github.com/Azure-Samples/WebApp-GroupClaims-DotNet). This sample uses the OpenID Connect ASP.Net OWIN middleware and ADAL .Net.
 
