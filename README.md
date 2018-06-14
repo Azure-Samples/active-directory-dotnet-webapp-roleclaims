@@ -50,7 +50,7 @@ To run this sample you will need:
 - Visual Studio 2015 or later. You can also use older versions of Visual Studio (we explain below the line of configuration to change)
 - An Internet connection
 - An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, please see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/) 
-- A user account in your Azure AD tenant. In the first case (run as a multi-tenant application), this sample will **not** work with **a Microsoft account**, so if you signed in to the Azure portal with a Microsoft account and have never created a user account in your directory before, you need to do that now. 
+- A user account in your Azure AD tenant. In the first case (run as a multi-tenant application), this sample will **not** work with **a Microsoft Personal account**, so if you signed in to the Azure portal with a Microsoft account and have never created a user account in your directory before, you need to do that now. 
 You can  use the  [Azure Management Portal](https://manage.windowsazure.com/) to create users, as explained in [Add new users or users with Microsoft accounts to Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-create-users). 
 Alternatively, you can add a user with the [Azure Portal](https://portal.azure.com). In that case be sure to give to a user an email address with the domain of your tenant (for instance user@contoso.onmicrosoft.com) so that this is not a guest MSA account.
 
