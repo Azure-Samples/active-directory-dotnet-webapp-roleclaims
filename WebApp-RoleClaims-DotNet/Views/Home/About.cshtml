@@ -2,10 +2,6 @@
     ViewBag.Title = "About";
 }
 <h2>@ViewBag.Title.</h2>
-<h3>Your Current Application Roles:</h3>
-<ul>
-    @foreach (string str in (List<string>)ViewData["appRoles"])
-    {
-        <li>@str</li>
-    }
-</ul>
+<h3>@ViewBag.Message</h3>
+
+<p>Use this area to provide additional information.</p>

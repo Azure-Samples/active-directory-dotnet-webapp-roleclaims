@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Microsoft.Owin;
 using Owin;
-using WebApp_RoleClaims_DotNet.Utils;
 
 [assembly: OwinStartup(typeof(WebApp_RoleClaims_DotNet.Startup))]
 
