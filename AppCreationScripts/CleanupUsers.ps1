@@ -8,12 +8,25 @@ param(
 Import-Module AzureAD
 $ErrorActionPreference = 'Stop'
 
-Function Cleanup
+Function RemoveUser([string]$userPrincipal)
 {
-<#
-.Description
-This function removes the Azure AD applications for the sample. These applications were created by the Configure.ps1 script
-#>
+    $user = Get-AzureADUser -Filter "UserPrincipalName eq '$userPrincipal'"
+    if ($user)
+    {
+        Write-Host "Removing User '($userPrincipal)'"
+        Remove-AzureADUser -ObjectId $user.ObjectId
+    }
+    else {
+        Write-Host "Failed to remove user '($userPrincipal)'"
+    }
+}
+
+Function CleanupUsers
+{
+    <#
+    .Description
+    This function removes the Azure AD applications for the sample. These applications were created by the Configure.ps1 script
+    #>
 
     # $tenantId is the Active Directory Tenant. This is a GUID which represents the "Directory ID" of the AzureAD tenant 
     # into which you want to create the apps. Look it up in the Azure portal in the "Properties" of the Azure AD. 
@@ -41,19 +54,18 @@ This function removes the Azure AD applications for the sample. These applicatio
         $tenantId = $creds.Tenant.Id
     }
     $tenant = Get-AzureADTenantDetail
+
     $tenantName =  ($tenant.VerifiedDomains | Where { $_._Default -eq $True }).Name
-    
-    # Removes the applications
-    Write-Host "Cleaning-up applications from tenant '$tenantName'"
 
-    Write-Host "Removing 'service' (TaskTrackerWebApp-RoleClaims) if needed"
-    $app=Get-AzureADApplication -Filter "identifierUris/any(uri:uri eq 'https://$tenantName/TaskTrackerWebApp-RoleClaims')"  
-    if ($app)
-    {
-        Remove-AzureADApplication -ObjectId $app.ObjectId
-        Write-Host "Removed the app."
-    }
+        $appName = "TaskTrackerWebApp-RoleClaims"
 
+        # Removes the users created for the application
+        Write-Host "Removing Users"
+        RemoveUser -userPrincipal "$appName-Approver@$tenantName"
+        RemoveUser -userPrincipal "$appName-Writer@$tenantName"
+        RemoveUser -userPrincipal "$appName-Observer@$tenantName"
+
+        Write-Host "Removed all users." 
 }
 
-Cleanup -Credential $Credential -tenantId $TenantId
+CleanupUsers -Credential $Credential -tenantId $TenantId

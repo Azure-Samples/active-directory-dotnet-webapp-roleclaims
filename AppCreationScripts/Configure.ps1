@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [PSCredential] $Credential,
-    [Parameter(HelpMessage='Tenant ID (This is a GUID which represents the "Directory ID" of the AzureAD tenant into which you want to create the apps')]
+    [Parameter(Mandatory=$False, HelpMessage='Tenant ID (This is a GUID which represents the "Directory ID" of the AzureAD tenant into which you want to create the apps')]
     [string] $tenantId
 )
 
@@ -16,6 +16,87 @@ param(
 
  There are four ways to run this script. For more information, read the AppCreationScripts.md file in the same folder as this script.
 #>
+
+# Create a password that can be used as an application key
+Function ComputePassword
+{
+    $aesManaged = New-Object "System.Security.Cryptography.AesManaged"
+    $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
+    $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
+    $aesManaged.BlockSize = 128
+    $aesManaged.KeySize = 256
+    $aesManaged.GenerateKey()
+    return [System.Convert]::ToBase64String($aesManaged.Key)
+}
+
+# Create an application key
+# See https://www.sabin.io/blog/adding-an-azure-active-directory-application-and-key-using-powershell/
+Function CreateAppKey([DateTime] $fromDate, [double] $durationInYears, [string]$pw)
+{
+    $endDate = $fromDate.AddYears($durationInYears) 
+    $keyId = (New-Guid).ToString();
+    $key = New-Object Microsoft.Open.AzureAD.Model.PasswordCredential
+    $key.StartDate = $fromDate
+    $key.EndDate = $endDate
+    $key.Value = $pw
+    $key.KeyId = $keyId
+    return $key
+}
+
+# Adds the requiredAccesses (expressed as a pipe separated string) to the requiredAccess structure
+# The exposed permissions are in the $exposedPermissions collection, and the type of permission (Scope | Role) is 
+# described in $permissionType
+Function AddResourcePermission($requiredAccess, `
+                               $exposedPermissions, [string]$requiredAccesses, [string]$permissionType)
+{
+        foreach($permission in $requiredAccesses.Trim().Split("|"))
+        {
+            foreach($exposedPermission in $exposedPermissions)
+            {
+                if ($exposedPermission.Value -eq $permission)
+                 {
+                    $resourceAccess = New-Object Microsoft.Open.AzureAD.Model.ResourceAccess
+                    $resourceAccess.Type = $permissionType # Scope = Delegated permissions | Role = Application permissions
+                    $resourceAccess.Id = $exposedPermission.Id # Read directory data
+                    $requiredAccess.ResourceAccess.Add($resourceAccess)
+                 }
+            }
+        }
+}
+
+#
+# Exemple: GetRequiredPermissions "Microsoft Graph"  "Graph.Read|User.Read"
+# See also: http://stackoverflow.com/questions/42164581/how-to-configure-a-new-azure-ad-application-through-powershell
+Function GetRequiredPermissions([string] $applicationDisplayName, [string] $requiredDelegatedPermissions, [string]$requiredApplicationPermissions, $servicePrincipal)
+{
+    # If we are passed the service principal we use it directly, otherwise we find it from the display name (which might not be unique)
+    if ($servicePrincipal)
+    {
+        $sp = $servicePrincipal
+    }
+    else
+    {
+        $sp = Get-AzureADServicePrincipal -Filter "DisplayName eq '$applicationDisplayName'"
+    }
+    $appid = $sp.AppId
+    $requiredAccess = New-Object Microsoft.Open.AzureAD.Model.RequiredResourceAccess
+    $requiredAccess.ResourceAppId = $appid 
+    $requiredAccess.ResourceAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.ResourceAccess]
+
+    # $sp.Oauth2Permissions | Select Id,AdminConsentDisplayName,Value: To see the list of all the Delegated permissions for the application:
+    if ($requiredDelegatedPermissions)
+    {
+        AddResourcePermission $requiredAccess -exposedPermissions $sp.Oauth2Permissions -requiredAccesses $requiredDelegatedPermissions -permissionType "Scope"
+    }
+    
+    # $sp.AppRoles | Select Id,AdminConsentDisplayName,Value: To see the list of all the Application permissions for the application
+    if ($requiredApplicationPermissions)
+    {
+        AddResourcePermission $requiredAccess -exposedPermissions $sp.AppRoles -requiredAccesses $requiredApplicationPermissions -permissionType "Role"
+    }
+    return $requiredAccess
+}
+
 
 # Replace the value of an appsettings of a given key in an XML App.Config file.
 Function ReplaceSetting([string] $configFilePath, [string] $key, [string] $newValue)
@@ -75,29 +156,29 @@ Function ConfigureApplications
     $tenant = Get-AzureADTenantDetail
     $tenantName =  ($tenant.VerifiedDomains | Where { $_._Default -eq $True }).Name
 
-    $perm = [Microsoft.Open.AzureAD.Model.RequiredResourceAccess]@{
-    ResourceAppId  = "00000002-0000-0000-c000-000000000000"; # Windows Azure Active Directory/Microsoft.Azure.ActiveDirectory
-    ResourceAccess = [Microsoft.Open.AzureAD.Model.ResourceAccess]@{
-        Id   = "311a71cc-e848-46a1-bdf8-97ff7156d8e6"; #access scope: Delegated permission to sign in and read user profile
-        Type = "Scope"
-        }
-    }
+    # Get the user running the script
+    $user = Get-AzureADUser -ObjectId $creds.Account.Id
+
    # Create the service AAD application
    Write-Host "Creating the AAD application (TaskTrackerWebApp-RoleClaims)"
+   # Get a 2 years application key for the service Application
+   $pw = ComputePassword
+   $fromDate = [DateTime]::Now;
+   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
+   $serviceAppKey = $pw
    $serviceAadApplication = New-AzureADApplication -DisplayName "TaskTrackerWebApp-RoleClaims" `
                                                    -HomePage "https://localhost:44322/" `
                                                    -LogoutUrl "https://localhost:44322/Account/EndSession" `
                                                    -ReplyUrls "https://localhost:44322/" `
                                                    -IdentifierUris "https://$tenantName/TaskTrackerWebApp-RoleClaims" `
-                                                   -RequiredResourceAccess $perm `
+                                                   -PasswordCredentials $key `
                                                    -PublicClient $False
 
 
    $currentAppId = $serviceAadApplication.AppId
    $serviceServicePrincipal = New-AzureADServicePrincipal -AppId $currentAppId -Tags {WindowsAzureActiveDirectoryIntegratedApp}
 
-   # add this user as app owner
-   $user = Get-AzureADUser -ObjectId $creds.Account.Id
+   # add the user running the script as an app owner
    Add-AzureADApplicationOwner -ObjectId $serviceAadApplication.ObjectId -RefObjectId $user.ObjectId
    Write-Host "'$($user.UserPrincipalName)' added as an application owner to app '$($serviceServicePrincipal.DisplayName)'"
 
@@ -107,6 +188,17 @@ Function ConfigureApplications
    $servicePortalUrl = "https://portal.azure.com/#@"+$tenantName+"/blade/Microsoft_AAD_IAM/ApplicationBlade/appId/"+$serviceAadApplication.AppId+"/objectId/"+$serviceAadApplication.ObjectId
    Add-Content -Value "<tr><td>service</td><td>$currentAppId</td><td><a href='$servicePortalUrl'>TaskTrackerWebApp-RoleClaims</a></td></tr>" -Path createdApps.html
 
+   $requiredResourcesAccess = New-Object System.Collections.Generic.List[Microsoft.Open.AzureAD.Model.RequiredResourceAccess]
+
+   # Add Required Resources Access (from 'service' to 'Microsoft Graph')
+   Write-Host "Getting access from 'service' to 'Microsoft Graph'"
+   $requiredPermissions = GetRequiredPermissions -applicationDisplayName "Microsoft Graph" `
+                                                 -requiredDelegatedPermissions "Directory.Read.All|User.Read";
+   $requiredResourcesAccess.Add($requiredPermissions)
+
+
+   Set-AzureADApplication -ObjectId $serviceAadApplication.ObjectId -RequiredResourceAccess $requiredResourcesAccess
+   Write-Host "Granted permissions."
 
    # Update config file for 'service'
    $configFile = $pwd.Path + "\..\WebApp-RoleClaims-DotNet\Web.Config"
@@ -114,12 +206,13 @@ Function ConfigureApplications
    ReplaceSetting -configFilePath $configFile -key "ida:ClientId" -newValue $serviceAadApplication.AppId
    ReplaceSetting -configFilePath $configFile -key "ida:Domain" -newValue $tenantName
    ReplaceSetting -configFilePath $configFile -key "ida:TenantId" -newValue $tenantId
+   ReplaceSetting -configFilePath $configFile -key "ida:ClientSecret" -newValue $serviceAppKey
    ReplaceSetting -configFilePath $configFile -key "ida:PostLogoutRedirectUri" -newValue $serviceAadApplication.HomePage
    Write-Host ""
    Write-Host "IMPORTANT: Think of completing the following manual step(s) in the Azure portal":
    Write-Host "- For 'service'"
    Write-Host "  - Navigate to '$servicePortalUrl'"
-   Write-Host "  - Refer to the 'Define your application roles' section in README on how to configure your newly created app further."
+   Write-Host "  - Run the ..\CreateUsersAndRoles.ps1 command to automatically create a number of users, app roles and assign users to these roles or refer to the 'Define your application roles' section in README on how to configure your newly created app further for this sample."
 
    Add-Content -Value "</tbody></table></body></html>" -Path createdApps.html  
 }
