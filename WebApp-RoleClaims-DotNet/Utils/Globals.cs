@@ -23,24 +23,20 @@ SOFTWARE.
 ***********************************************************************************************/
 
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
-using Microsoft.Owin;
-using Owin;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 
-[assembly: OwinStartup(typeof(WebApp_RoleClaims_DotNet.Startup))]
-
-namespace WebApp_RoleClaims_DotNet
+namespace WebApp_RoleClaims_DotNet.Utils
 {
-    public partial class Startup
+    public static class Globals
     {
-        public void Configuration(IAppBuilder app)
-        {
-            // Comment the following line to try out the multi-tenant scenario
-            ConfigureAuth(app);
+        private static string objectIdClaimType = "http://schemas.microsoft.com/identity/claims/objectidentifier";
+        private const string tenantIdClaimType = "http://schemas.microsoft.com/identity/claims/tenantid";
+        private static List<String> taskStatuses = new List<String>(new String[4] { "Not  Started", "In Progress", "Complete", "Blocked" });
 
-            // Uncomment the following line to try out the multi-tenant scenario
-            // ConfigureMultitenantAuth(app);
-        }
+        internal static string ObjectIdClaimType { get { return objectIdClaimType; } }
+        internal static string TenantIdClaimType { get { return tenantIdClaimType; } }
+        public static List<String> Statuses { get { return taskStatuses; } }
     }
 }

@@ -1,4 +1,4 @@
-﻿/************************************************************************************************
+/************************************************************************************************
 The MIT License (MIT)
 
 Copyright (c) 2015 Microsoft Corporation
@@ -37,16 +37,16 @@ namespace WebApp_RoleClaims_DotNet
     public partial class Startup
     {
         /// <summary>
-        /// Configures OpenIDConnect Authentication & Adds Custom Application Authorization Logic on User Login.
+        /// Configures OpenIDConnect Authentication & Adds Custom Application Authorization Logic on User Login for Multi-tenant scenario.
         /// </summary>
         /// <param name="app">The application represented by a <see cref="IAppBuilder"/> object.</param>
-        public void ConfigureAuth(IAppBuilder app)
+        public void ConfigureMultitenantAuth(IAppBuilder app)
         {
             // By default, the claims mapping will map claim names in the old format to accommodate older SAML applications.
             // 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role' instead of 'roles'
             // This flag ensures that the ClaimsIdentity claims collection will be built from the claims in the token
             JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-         
+
             app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
 
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
@@ -55,15 +55,20 @@ namespace WebApp_RoleClaims_DotNet
                 new OpenIdConnectAuthenticationOptions
                 {
                     ClientId = ConfigHelper.ClientId,
-                    Authority = ConfigHelper.Authority,
+                    Authority = ConfigHelper.CommonAuthority, // Use the 'common' endpoint for multi-tenant
                     RedirectUri = "https://localhost:44322/",
                     PostLogoutRedirectUri = ConfigHelper.PostLogoutRedirectUri,
 
+                    // Here, we've disabled issuer validation for the multi-tenant sample.  This enables users
+                    // from ANY tenant to sign into the application (solely for the purposes of allowing the sample
+                    // to be run out-of-the-box.  For a real multi-tenant app, reference the issuer validation in 
+                    // WebApp-MultiTenant-OpenIDConnect-DotNet.  If you're running this sample as a single-tenant
+                    // app, you can delete the ValidateIssuer property below.
                     TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateIssuer = true,
-                        NameClaimType = "upn",
-                        RoleClaimType = "roles",    // The claim in the Jwt token where App roles are provided.
+                        ValidateIssuer = false,
+                        RoleClaimType = "roles",
+                        NameClaimType = "upn"
                     },
 
                     Notifications = new OpenIdConnectAuthenticationNotifications()

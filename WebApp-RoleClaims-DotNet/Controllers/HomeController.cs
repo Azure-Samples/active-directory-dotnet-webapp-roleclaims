@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.Security.Claims;
 using System.Web.Mvc;
 
 namespace WebApp_RoleClaims_DotNet.Controllers
@@ -16,7 +15,13 @@ namespace WebApp_RoleClaims_DotNet.Controllers
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
+            ViewBag.Message = "Your app roles.";
+
+            ClaimsIdentity claimsId = ClaimsPrincipal.Current.Identity as ClaimsIdentity;
+            var appRoles = new List<String>();
+            foreach (Claim claim in ClaimsPrincipal.Current.FindAll("roles"))
+                appRoles.Add(claim.Value);
+            ViewData["appRoles"] = appRoles;
 
             return View();
         }

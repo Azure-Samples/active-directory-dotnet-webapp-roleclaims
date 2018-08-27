@@ -51,7 +51,7 @@ This function removes the Azure AD applications for the sample. These applicatio
     if ($app)
     {
         Remove-AzureADApplication -ObjectId $app.ObjectId
-        Write-Host "Removed the app."
+        Write-Host "Removed."
     }
 
 }

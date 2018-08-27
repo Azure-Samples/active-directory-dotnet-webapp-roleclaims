@@ -16,9 +16,14 @@
       "IsPublicClient": false,
       "HomePage": "https://localhost:44322/",
       "ReplyUrls": "https://localhost:44322/",
-      "LogoutUrl": "https://localhost:44322/Account/EndSession",    
-      "ManualSteps": [
-        { "Comment": "Refer to the 'Define your application roles' section in README on how to configure your newly created app further." }
+      "LogoutUrl": "https://localhost:44322/Account/EndSession",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [ "Directory.Read.All","User.Read" ]
+        }
+      ],"ManualSteps": [
+        { "Comment": "Run the ..\\CreateUsersAndRoles.ps1 command to automatically create a number of users, app roles and assign users to these roles or refer to the 'Define your application roles' section in README on how to configure your newly created app further for this sample." }
       ]
     }
   ],
@@ -38,11 +43,7 @@
         {
           "key": "ida:ClientId",
           "value": ".AppId"
-        },
-        {
-          "key": "ida:Domain",
-          "value": "$tenantName"
-        },
+        },        
         {
           "key": "ida:TenantId",
           "value": "$tenantId"

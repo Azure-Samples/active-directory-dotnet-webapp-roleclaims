@@ -183,3 +183,6 @@ UpgradeLog*.htm
 FakesAssemblies/
 /.vs
 /.nuget
+/AppCreationScripts/createdApps.html
+/AppCreationScripts/Steps.md
+/AppCreationScripts/Steps.txt

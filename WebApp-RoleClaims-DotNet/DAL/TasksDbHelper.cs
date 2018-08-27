@@ -23,24 +23,51 @@ SOFTWARE.
 ***********************************************************************************************/
 
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
-using Microsoft.Owin;
-using Owin;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using WebApp_RoleClaims_DotNet.Models;
 
-[assembly: OwinStartup(typeof(WebApp_RoleClaims_DotNet.Startup))]
-
-namespace WebApp_RoleClaims_DotNet
+namespace WebApp_RoleClaims_DotNet.DAL
 {
-    public partial class Startup
+    public class TasksDbHelper
     {
-        public void Configuration(IAppBuilder app)
+        // Get all tasks from the db.
+        public static List<Task> GetAllTasks()
         {
-            // Comment the following line to try out the multi-tenant scenario
-            ConfigureAuth(app);
+            RoleClaimContext db = new RoleClaimContext();
+            return db.Tasks.ToList();
+        }
 
-            // Uncomment the following line to try out the multi-tenant scenario
-            // ConfigureMultitenantAuth(app);
+        // Add a task to the db.
+        public static void AddTask(string taskText)
+        {
+            RoleClaimContext db = new RoleClaimContext();
+            Task newTask = new Task
+            {
+                Status = "NotStarted",
+                TaskText = taskText
+            };
+            db.Tasks.Add(newTask);
+            db.SaveChanges();
+        }
+
+        //Update an existing task in the db.
+        public static void UpdateTask(int taskId, string status)
+        {
+            RoleClaimContext db = new RoleClaimContext();
+            Task task = db.Tasks.Find(taskId);
+            task.Status = status;
+            db.SaveChanges();
+        }
+
+        //Delete a task in the db
+        public static void DeleteTask(int taskId)
+        {
+            RoleClaimContext db = new RoleClaimContext();
+            Task task = db.Tasks.Find(taskId);
+            db.Tasks.Remove(task);
+            db.SaveChanges();
         }
     }
 }

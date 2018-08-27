@@ -17,32 +17,6 @@ param(
  There are four ways to run this script. For more information, read the AppCreationScripts.md file in the same folder as this script.
 #>
 
-# Create a password that can be used as an application key
-Function ComputePassword
-{
-    $aesManaged = New-Object "System.Security.Cryptography.AesManaged"
-    $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
-    $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
-    $aesManaged.BlockSize = 128
-    $aesManaged.KeySize = 256
-    $aesManaged.GenerateKey()
-    return [System.Convert]::ToBase64String($aesManaged.Key)
-}
-
-# Create an application key
-# See https://www.sabin.io/blog/adding-an-azure-active-directory-application-and-key-using-powershell/
-Function CreateAppKey([DateTime] $fromDate, [double] $durationInYears, [string]$pw)
-{
-    $endDate = $fromDate.AddYears($durationInYears) 
-    $keyId = (New-Guid).ToString();
-    $key = New-Object Microsoft.Open.AzureAD.Model.PasswordCredential
-    $key.StartDate = $fromDate
-    $key.EndDate = $endDate
-    $key.Value = $pw
-    $key.KeyId = $keyId
-    return $key
-}
-
 # Adds the requiredAccesses (expressed as a pipe separated string) to the requiredAccess structure
 # The exposed permissions are in the $exposedPermissions collection, and the type of permission (Scope | Role) is 
 # described in $permissionType
@@ -161,17 +135,11 @@ Function ConfigureApplications
 
    # Create the service AAD application
    Write-Host "Creating the AAD application (TaskTrackerWebApp-RoleClaims)"
-   # Get a 2 years application key for the service Application
-   $pw = ComputePassword
-   $fromDate = [DateTime]::Now;
-   $key = CreateAppKey -fromDate $fromDate -durationInYears 2 -pw $pw
-   $serviceAppKey = $pw
    $serviceAadApplication = New-AzureADApplication -DisplayName "TaskTrackerWebApp-RoleClaims" `
                                                    -HomePage "https://localhost:44322/" `
                                                    -LogoutUrl "https://localhost:44322/Account/EndSession" `
                                                    -ReplyUrls "https://localhost:44322/" `
                                                    -IdentifierUris "https://$tenantName/TaskTrackerWebApp-RoleClaims" `
-                                                   -PasswordCredentials $key `
                                                    -PublicClient $False
 
 
@@ -204,9 +172,7 @@ Function ConfigureApplications
    $configFile = $pwd.Path + "\..\WebApp-RoleClaims-DotNet\Web.Config"
    Write-Host "Updating the sample code ($configFile)"
    ReplaceSetting -configFilePath $configFile -key "ida:ClientId" -newValue $serviceAadApplication.AppId
-   ReplaceSetting -configFilePath $configFile -key "ida:Domain" -newValue $tenantName
    ReplaceSetting -configFilePath $configFile -key "ida:TenantId" -newValue $tenantId
-   ReplaceSetting -configFilePath $configFile -key "ida:ClientSecret" -newValue $serviceAppKey
    ReplaceSetting -configFilePath $configFile -key "ida:PostLogoutRedirectUri" -newValue $serviceAadApplication.HomePage
    Write-Host ""
    Write-Host "IMPORTANT: Think of completing the following manual step(s) in the Azure portal":

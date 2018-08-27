@@ -23,24 +23,17 @@ SOFTWARE.
 ***********************************************************************************************/
 
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
-using Microsoft.Owin;
-using Owin;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 
-[assembly: OwinStartup(typeof(WebApp_RoleClaims_DotNet.Startup))]
-
-namespace WebApp_RoleClaims_DotNet
+namespace WebApp_RoleClaims_DotNet.Models
 {
-    public partial class Startup
+    public class Task
     {
-        public void Configuration(IAppBuilder app)
-        {
-            // Comment the following line to try out the multi-tenant scenario
-            ConfigureAuth(app);
-
-            // Uncomment the following line to try out the multi-tenant scenario
-            // ConfigureMultitenantAuth(app);
-        }
+        //Every Task entry has a Task, a Status, and a TaskID
+        public int TaskID { get; set; }
+        public string TaskText { get; set; }
+        public string Status { get; set; }
     }
 }

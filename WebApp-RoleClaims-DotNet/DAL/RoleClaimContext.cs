@@ -1,4 +1,4 @@
-﻿/************************************************************************************************
+/************************************************************************************************
 The MIT License (MIT)
 
 Copyright (c) 2015 Microsoft Corporation
@@ -22,25 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ***********************************************************************************************/
 
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Threading.Tasks;
-using Microsoft.Owin;
-using Owin;
-
-[assembly: OwinStartup(typeof(WebApp_RoleClaims_DotNet.Startup))]
-
-namespace WebApp_RoleClaims_DotNet
+namespace WebApp_RoleClaims_DotNet.DAL
 {
-    public partial class Startup
-    {
-        public void Configuration(IAppBuilder app)
-        {
-            // Comment the following line to try out the multi-tenant scenario
-            ConfigureAuth(app);
+    using System;
+    using System.Data.Entity;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
+    using WebApp_RoleClaims_DotNet.Models;
 
-            // Uncomment the following line to try out the multi-tenant scenario
-            // ConfigureMultitenantAuth(app);
+    public partial class RoleClaimContext : DbContext
+    {
+        public RoleClaimContext()
+            : base("name=RoleClaimContext")
+        {
         }
+
+        public DbSet<Task> Tasks { get; set; }
+
     }
 }
