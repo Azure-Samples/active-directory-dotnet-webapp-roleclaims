@@ -78,6 +78,7 @@ $secpasswd = ConvertTo-SecureString "[Password here]" -AsPlainText -Force
 $mycreds = New-Object System.Management.Automation.PSCredential ("[login@tenantName here]", $secpasswd)
 . .\Cleanup.ps1 -Credential $mycreds
 . .\Configure.ps1 -Credential $mycreds
+. .\CreateUsersAndRoles.ps1 -Credential $mycreds
 ```
 
 Of course, in real life, you might already get the password as a `SecureString`. You might also want to get the password from KeyVault.
@@ -95,6 +96,7 @@ Of course, in real life, you might already get the password as a `SecureString`.
 $tenantId = "yourTenantIdGuid"
 . .\Cleanup.ps1 -TenantId $tenantId
 . .\Configure.ps1 -TenantId $tenantId
+. .\CreateUsersAndRoles.ps1 -Credential $tenantId
 ```
 
 #### Option 4 (non-interactive, and create apps in a specified tenant)
@@ -107,4 +109,5 @@ $mycreds = New-Object System.Management.Automation.PSCredential ("[login@tenantN
 $tenantId = "yourTenantIdGuid"
 . .\Cleanup.ps1 -Credential $mycreds -TenantId $tenantId
 . .\Configure.ps1 -Credential $mycreds -TenantId $tenantId
+. .\CreateUsersAndRoles.ps1 -Credential $mycreds -TenantId $tenantId
 ```
