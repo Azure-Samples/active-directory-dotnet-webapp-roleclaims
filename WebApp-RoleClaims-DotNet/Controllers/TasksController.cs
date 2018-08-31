@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 using System.Web.Mvc;
 using WebApp_RoleClaims_DotNet.DAL;
-using WebApp_RoleClaims_DotNet.Utils;
-//The following libraries were defined and added to this sample.
 
 namespace WebApp_RoleClaims_DotNet.Controllers
 {
@@ -23,7 +24,7 @@ namespace WebApp_RoleClaims_DotNet.Controllers
             return View();
         }
 
-        
+
         /// <summary>
         /// Add a new task to the database or Update the Status of an Existing Task.  Requires that
         /// the user has a application role of Admin, Writer, or Approver, and only allows certain actions based
@@ -46,21 +47,22 @@ namespace WebApp_RoleClaims_DotNet.Controllers
             {
                 // Change status of existing task
                 foreach (string key in formCollection.Keys)
-                { 
+                {
                     if (key != "newtask" && key != "delete")
                         TasksDbHelper.UpdateTask(Convert.ToInt32(key), formCollection[key]);
                 }
             }
 
             if (User.IsInRole("Admin"))
-            { 
+            {
                 // Delete a Task
                 foreach (string key in formCollection.Keys)
-                { 
+                {
                     if (key == "delete" && formCollection[key] != null && formCollection[key].Length > 0)
                     {
                         string[] toDelete = formCollection[key].Split(',');
-                        foreach (string id in toDelete) {
+                        foreach (string id in toDelete)
+                        {
                             TasksDbHelper.DeleteTask(Convert.ToInt32(id));
                         }
                     }
