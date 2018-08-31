@@ -111,7 +111,7 @@ of the Azure Active Directory window respectively as *Name* and *Directory ID*
 1. Edit the manifest by locating the `appRoles` setting and adding all four Application Roles.  The role definitions are provided in the JSON block below.  Leave the `allowedMemberTypes` to "User" only.  Each role definition in this manifest must have a different valid **Guid** for the "ID" property. Note that the `"value"` property of each role is set to the exact strings "Admin", "Approver", "Observer", and "Writer" (as these strings are used in the code in the application).
 1. Save the manifest.
 
-The content of `appRoles` should be the following (the `ìd` can be any unique GUID
+The content of `appRoles` should be the following (the `id` can be any unique GUID)
 
 ```JSon
 "appRoles": [
@@ -253,10 +253,19 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 For more information, see [Azure Active Directory, now with Group Claims and Application Roles] (https://cloudblogs.microsoft.com/enterprisemobility/2014/12/18/azure-active-directory-now-with-group-claims-and-application-roles/)
 
+- [Developing ASP.NET Apps with Azure Active Directory](https://docs.microsoft.com/en-us/aspnet/identity/overview/getting-started/developing-aspnet-apps-with-windows-azure-active-directory#create-an-aspnet-application)
+- [Token validation](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/ValidatingTokens)
 - [Application roles](https://docs.microsoft.com/en-us/azure/architecture/multitenant-identity/app-roles)
 - [Azure AD Connect sync: Understanding Users, Groups, and Contacts](https://docs.microsoft.com/en-us/azure/active-directory/connect/active-directory-aadconnectsync-understanding-users-and-contacts)
+
+<!--
+
+The sample does not use ADAL ...
+
 - [Recommended pattern to acquire a token](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/AcquireTokenSilentAsync-using-a-cached-token#recommended-pattern-to-acquire-a-token)
 - [Acquiring tokens interactively in public client applications](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/Acquiring-tokens-interactively---Public-client-application-flows)
 - [Customizing Token cache serialization](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/Token-cache-serialization)
+
+-->
 
 For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).
