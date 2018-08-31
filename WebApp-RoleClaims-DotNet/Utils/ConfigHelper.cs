@@ -53,7 +53,7 @@ namespace WebApp_RoleClaims_DotNet.Utils
         /// <summary>
         /// The Authority is the sign-in URL of the tenant.
         /// </summary>
-        public static string Authority = AADInstance + TenantId;
+        public static string Authority = String.Format(CultureInfo.InvariantCulture, AADInstance, TenantId) + "/" ;
 
         /// <summary>
         /// The Azure AD 'common' endpoint to authenticate users for multi-tenant applications.

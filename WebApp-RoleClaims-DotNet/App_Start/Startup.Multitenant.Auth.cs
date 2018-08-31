@@ -54,16 +54,15 @@ namespace WebApp_RoleClaims_DotNet
             app.UseOpenIdConnectAuthentication(
                 new OpenIdConnectAuthenticationOptions
                 {
-                    ClientId = ConfigHelper.ClientId,
-                    Authority = ConfigHelper.CommonAuthority, // Use the 'common' endpoint for multi-tenant
+                    ClientId = "d43fe016-2ce2-4686-ad31-9169be137d72",  // This app is already registered as a multi-tenant app in the Microsoft tenant. The clientId provided in the web.config is ignored.
+                    Authority = ConfigHelper.CommonAuthority,           // Use the 'common' endpoint for multi-tenant
                     RedirectUri = "https://localhost:44322/",
                     PostLogoutRedirectUri = ConfigHelper.PostLogoutRedirectUri,
 
                     // Here, we've disabled issuer validation for the multi-tenant sample.  This enables users
                     // from ANY tenant to sign into the application (solely for the purposes of allowing the sample
                     // to be run out-of-the-box.  For a real multi-tenant app, reference the issuer validation in 
-                    // WebApp-MultiTenant-OpenIDConnect-DotNet.  If you're running this sample as a single-tenant
-                    // app, you can delete the ValidateIssuer property below.
+                    // WebApp-MultiTenant-OpenIDConnect-DotNet.  
                     TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = false,

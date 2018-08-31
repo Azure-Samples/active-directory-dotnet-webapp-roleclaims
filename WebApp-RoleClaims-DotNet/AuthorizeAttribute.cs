@@ -64,10 +64,5 @@ namespace WebApp_RoleClaims_DotNet
                 base.HandleUnauthorizedRequest(filterContext);
             }
         }
-
-        public override void OnAuthorization(AuthorizationContext filterContext)
-        {
-            base.OnAuthorization(filterContext);
-        }
     }
 }

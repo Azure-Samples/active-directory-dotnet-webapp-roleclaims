@@ -2,113 +2,113 @@
 services: active-directory
 platforms: dotnet
 author: jmprieur
+level: 400
+client: .NET 4.6.1 Web App (MVC)
+service: ASP.NET Web API
+endpoint: AAD V1
 ---
 
 # Authorization in a web app using Azure AD application roles & role claims
 
-![](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/38/badge)
+![Build badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/38/badge)
 
-This sample shows how to build an MVC web application that uses Azure AD Application Roles for authorization. Authorization in Azure AD can also be done with Azure AD Groups, as shown in [WebApp-GroupClaims-DotNet](https://github.com/Azure-Samples/WebApp-GroupClaims-DotNet). This sample uses the OpenID Connect ASP.Net OWIN middleware and ADAL .Net.
+## About this sample
+
+### Overview
+
+This sample demonstrates a .NET 4.6 Web App (MVC) application secured using Azure Active Directory using Azure AD Application Roles for authorization. 
+
+This application implements RBAC using Azure AD's Application Roles & Role Claims feature. Another approach is to use Azure AD Groups and Group Claims, as shown in [WebApp-GroupClaims-DotNet](https://github.com/Azure-Samples/WebApp-GroupClaims-DotNet). Azure AD Groups and Application Roles are by no means mutually exclusive; they can be used in tandem to provide even finer grained access control.
+
+Using RBAC with Application Roles and Role Claims, developers can securely enforce authorization policies with minimal effort on their part.
+
+- An Azure AD Office Hours session covered Azure AD App roles and security groups, featuring this scenario and this sample. Watch the video [Using Security Groups and Application Roles in your apps](https://www.youtube.com/watch?v=V8VUPixLSiM)
 
 For more information about how the protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).
 
 > Looking for previous versions of this code sample? Check out the tags on the [releases](../../releases) GitHub page.
 
-## About the Sample
+![Overview](./ReadmeFiles/Single-tenant-topology.png)
 
-This MVC 5 web application is a simple "Task Tracker" application that allows users to create, read, update, and delete tasks.  Within the application, access to certain functionality is restricted to subsets of users. For instance, not every user has the ability to create a task.
+## Scenario
 
-This kind of authorization is implemented using role based access control (RBAC).  When using RBAC, an administrator grants permissions to roles, not to individual users or groups. The administrator can then assign roles to different users and groups to control who has access to what content and functionality.  
+This MVC web application is a simple "Task Tracker" application that allows users to create, read, update, and delete tasks. Within the application, access to certain functionality is restricted to subsets of users. For instance, not every user has the ability to create a task.
 
-This application implements RBAC using Azure AD's Application Roles & Role Claims features.  Another approach is to use Azure AD Groups and Group Claims, as shown in [WebApp-GroupClaims-DotNet](https://github.com/Azure-Samples/WebApp-GroupClaims-DotNet).  Azure AD Groups and Application Roles are by no means mutually exclusive - they can be used in tandem to provide even finer grained access control.
+This kind of authorization is implemented using role based access control (RBAC). When using RBAC, an administrator grants permissions to roles, not to individual users or groups. The administrator can then assign roles to different users and groups to control who has access to what content and functionality.  
 
-Our Task Tracker application defines four *Application Roles*:
-- Admin: Has the ability to perform all actions, as well as manage the Application Roles.
-- Writer: Has the ability to create tasks.
-- Approver: Has the ability to change the status of tasks.
-- Observer: Only has the ability to view tasks and their statuses.
+Our Task Tracker application defines the following four *Application Roles*:
+- `Admin`: Has the ability to perform all actions, as well as manage the Application Roles.
+- `Writer`: Has the ability to create tasks.
+- `Approver`: Has the ability to change the status of tasks.
+- `Observer`: Only has the ability to view tasks and their statuses.
 
-These application roles are defined in the [Azure Management Portal](https://manage.windowsazure.com/) on the application registration page.  When a user signs into the application, AAD emits a Role Claim for each role that has been granted based on the user and their group membership.  Assignment of users and groups to roles can be done through the portal's UI, or programmatically using the [AAD Graph API](http://msdn.microsoft.com/en-us/library/azure/hh974476.aspx).  In this sample, application role management is done through the Azure Portal.
-
-Using RBAC with Application Roles and Role Claims, this application securely enforces authorization policies with minimal effort on the part of the developer.
+These application roles are defined in the [Azure portal](https://portal.azure.com) in the application's registration manifest.  When a user signs into the application, Azure AD emits a `roles` claim for each role that the user has been granted individually to the user and from their group membership.  Assignment of users and groups to roles can be done through the portal's UI, or programmatically using the [Microsoft Graph](https://graph.microsoft.com).  In this sample, application role management is done through the Azure Portal.
 
 NOTE: Role claims are not currently emitted in SAML tokens, only JWTs (see issue #1).
 
 NOTE: Role claims are not currently emitted for guest users in a tenant (see issue #2).
 
-## How to build the sample?
+## How to run this sample
 
-This sample is already registered in a Microsoft tenant as a multi-tenant application. Therefore you can run it in two different ways, depending on your business needs:
-- as a Multi-Tenant app (case 1). This requires little changes to the application itself, but there are contraints on the type of user.
-- as a Single-Tenant app (case 2).
+To run this sample, you'll need:
 
-For more details about when you want to use a single tenant or a multi-tenant application, see the "configuring multi-tenant applications" paragraph of [Integrating applications with Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-integrating-applications)
-
-
-### Prerequisites
-To run this sample you will need:
-- Visual Studio 2015 or later. You can also use older versions of Visual Studio (we explain below the line of configuration to change)
+- [Visual Studio 2017](https://aka.ms/vsdownload)
 - An Internet connection
-- An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, please see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/) 
-- A user account in your Azure AD tenant. In the first case (run as a multi-tenant application), this sample will **not** work with **a Microsoft Personal account**, so if you signed in to the Azure portal with a Microsoft account and have never created a user account in your directory before, you need to do that now. 
-You can  use the  [Azure Management Portal](https://manage.windowsazure.com/) to create users, as explained in [Add new users or users with Microsoft accounts to Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/active-directory-create-users). 
-Alternatively, you can add a user with the [Azure Portal](https://portal.azure.com). In that case be sure to give to a user an email address with the domain of your tenant (for instance user@contoso.onmicrosoft.com) so that this is not a guest MSA account.
+- An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/)
+- A user account in your Azure AD tenant. This sample will not work with a Microsoft account (formerly Windows Live account). Therefore, if you signed in to the [Azure portal](https://portal.azure.com) with a Microsoft account and have never created a user account in your directory before, you need to do that now.
 
 ### Step 1:  Clone or download this repository
 
 From your shell or command line:
 
-`git clone https://github.com/Azure-Samples/active-directory-dotnet-webapp-authz-roleclaims.git`
+`git clone https://github.com/Azure-Samples/active-directory-dotnet-webapp-roleclaims.git`
 
-### Step 2: If you use Visual Studio 2013 or earlier, update the connection string
-If you are using Visual Studio 2015 or later, the sample will run as is. If you are using Visual Studio 2013 or earlier, you will need to change the `Data Source` portion of the `connectionString` in the `Web.Config` file from `Data Source=(LocalDb)\MSSQLLocalDB;` to `Data Source=(LocalDb)\v11.0;`
-The line should therefore be something like this:
-```
-  <connectionStrings>
-    <add name="RoleClaimContext" connectionString="Data Source=(LocalDb)\v11.0;Initial Catalog=WebApp_RoleClaims_DotNet;Integrated Security=SSPI;AttachDBFilename=|DataDirectory|\WebApp_RoleClaims_DotNet.mdf;" providerName="System.Data.SqlClient" />
-  </connectionStrings>
-  ```
+> Given that the name of the sample is pretty long, and so are the name of the referenced NuGet pacakges, you might want to clone it in a folder close to the root of your hard drive, to avoid file size limitations on Windows.
 
-## Case 1: How to run the sample as a Multi-Tenant App
-As this sample application is already registered in a Microsoft tenant as a multi-tenant application, you can run out of the box with your tenant by following these steps:
+### Step 2:  Register the sample with your Azure Active Directory tenant
 
-1. In Visual Studio, find the tenant key `ida:Tenant` (in the `Web.Config` file) and replace the value with the domain of your tenant. Do not change the other keys.
-2. Run the app in Visual Studio and sign in as a user in your AAD tenant, granting consent when prompted to do so.  
-    - NOTE: you can't use an MSA guest user account to sign in - it must be a user that you created in your tenant as explained above.
-    - At that point, once you have granted consent, if you go to the "Tasks" menu command, you will see "You do not have sufficient privileges to view this page". This is normal, because we have not assigned
-    any role to users in your directory yet. That's the goal of  next steps (3 to 5).
-3. In the [Azure management portal](https://manage.windowsazure.com), navigate to your tenant by clicking on Active Directory in the left hand nav and selecting the appropriate tenant. Note that if you choose to use the
-[azure portal](https://portal.azure.com) instead, you would find the provisioned application under *Enterprise applications* and you would have to adapt these steps slightly.
-4. Click the "Applications" tab, and locate the newly created entry for "WebApp-RoleClaims-DotNet." Click on it.
-5. On the following page, click on the "Users" tab.  Select any user, click the "Assign" button in the bottom tray, and assign the user to an Application Role.  Repeat this process for any users you would like to have access to Tasks in the application.
-6. Sign out of the sample application and sign back in.
+There are one projects in this sample. Each needs to be separately registered in your Azure AD tenant. To register these projects, you can:
 
-Explore the application by assigning various users and groups to roles via Azure Portal. Login as users in different roles, and notice the differences in functionality available to each.  Each role has different capabilities on the "Tasks" page, as described above.
+- either follow the steps in the paragraphs below ([Step 2](#step-2--register-the-sample-with-your-azure-active-directory-tenant) and [Step 3](#step-3--configure-the-sample-to-use-your-azure-ad-tenant))
+- or use PowerShell scripts that:
+  - **automatically** create for you the Azure AD applications and related objects (passwords, permissions, dependencies)
+  - modify the Visual Studio projects' configuration files.
 
-## Case 2: How To run The sample as a Single-Tenant App
-This section explains how to register the application as a single tenant application in your own tenant, rather than in a Microsoft tenant like in the previous section 
+If you want to use this automation, read the instructions in [App Creation Scripts](./AppCreationScripts/AppCreationScripts.md)
 
-### Step 1:  Register the sample with your Azure Active Directory tenant
+#### Step 1: choose the Azure AD tenant where you want to create your applications
+
+As a first step you'll need to:
 
 1. Sign in to the [Azure portal](https://portal.azure.com).
-2. On the top bar, click on your account and under the **Directory** list, choose the Active Directory tenant where you wish to register your application.
-3. Click on **More Services** in the left hand nav, and choose **Azure Active Directory**.
-4. Click on **App registrations** and choose **Add**.
-5. Enter a friendly name for the application, for example 'TaskTrackerWebApp' and select 'Web Application and/or Web API' as the Application Type. For the sign-on URL, enter the base URL for the sample, which is by default `https://localhost:44322/`. NOTE:  It is important, due to the way Azure AD matches URLs, to ensure there is a trailing slash on the end of this URL.  If you don't include the trailing slash, you will receive an error when the application attempts to redeem an authorization code. Click on **Create** to create the application.
-6. While still in the Azure portal, choose your application, click on **Settings** and choose **Properties**.
-7. Find the Application ID value and copy it to the clipboard.
-8. On the same page, change the `Logout Url` field to `https://localhost:44322/Account/EndSession`.  This is the default single sign out URL for this sample.
-9. For the App ID URI, enter `https://<your_tenant_name>/<your_application_name>`, replacing `<your_tenant_name>` with the name of your Azure AD tenant and `<your_application_name>` with the name you chose above. 
-10. From the Settings menu, choose **Keys** and add a key - select a key duration of either 1 year or 2 years. When you save this page, the key value will be displayed, copy and save the value in a safe location - you will need this key later to configure the project in Visual Studio - this key value will not be displayed again, nor retrievable by any other means, so please record it as soon as it is visible from the Azure Portal.
-11. Configure Permissions for your application - in the Settings menu, choose the 'Required permissions' section, click on **Add**, then **Select an API**, and select 'Microsoft Graph' (this is the Graph API). Then, click on  **Select Permissions** and select 'Read Directory Data' and 'Sign in and read user profile'.
+1. On the top bar, click on your account, and then on **Switch Directory**.
+1. Once the *Directory + subscription* pane opens, choose the Active Directory tenant where you wish to register your application, from the *Favorites* or *All Directories* list.
+1. Click on **All services** in the left-hand nav, and choose **Azure Active Directory**.
 
-### Step 2: Define your Application Roles
+> In the next steps, you might need the tenant name (or directory name) or the tenant ID (or directory ID). These are presented in the **Properties**
+of the Azure Active Directory window respectively as *Name* and *Directory ID*
+
+#### Register the service app (TaskTrackerWebApp-RoleClaims)
+
+1. In the  **Azure Active Directory** pane, click on **App registrations** and choose **New application registration**.
+1. Enter a friendly name for the application, for example 'TaskTrackerWebApp-RoleClaims' and select 'Web app / API' as the *Application Type*.
+1. For the *Sign-on URL*, enter the base URL for the sample. By default, this sample uses `https://localhost:44322/`.
+1. Click **Create** to create the application.
+1. In the succeeding page, Find the *Application ID* value and record it for later. You'll need it to configure the Visual Studio configuration file for this project.
+1. Then click on **Settings**, and choose **Properties**.
+1. For the App ID URI, replace the guid in the generated URI 'https://\<your_tenant_name\>/\<guid\>', with the name of your service, for example, 'https://\<your_tenant_name\>/TaskTrackerWebApp-RoleClaims' (replacing `<your_tenant_name>` with the name of your Azure AD tenant)
+1. From the **Settings** | **Reply URLs** page for your application, update the Reply URL for the application to be `https://localhost:44322/`
+1. For **Logout URL**, provide the value `https://localhost:44322/Account/EndSession`
+1. Configure Permissions for your application. To that extent, in the Settings menu, choose the 'Required permissions' section and then, click on **Add**, then **Select an API**, and type `Microsoft Graph` in the textbox. Then, click on  **Select Permissions** and select **Directory.Read.All**, **User.Read**.
+1. Navigate back to **Azure Active Directory** pane, and click on *Enterprise applications*.
+1. Click the "All Applications" tab, and locate the newly created entry for "WebApp-RoleClaims-DotNet." Click on it.
+1. On the following page, click on the "Users" tab.  Select any user, click the "Assign" button in the bottom tray, and assign the user to an Application Role.  Repeat this process for any users you would like to have access to Tasks in the application.
+
+#### Step 2: Define your Application Roles
 
 1. While still in the blade for your  application, click **Manifest**.
-2. Edit the manifest by locating the `appRoles` setting and adding all four Application Roles.  The role definitions are provided in the JSON block below.  Leave the allowedMemberTypes to "User" only.  Each role definition in this manifest must have a different valid Guid for the "id" property. Note that the `"value"` property of each role is set to the exact strings "Admin", "Approver", "Observer", and "Writer" (as these strings are used in the code in the application). 
-To do this replacement in the manifest, you have two options:
-    - Option 1: Edit the manifest in place by clicking **Edit**, replacing the appRoles value, and then clicking **Save**. 
-    - Option 2: **Download** the manifest to your computer, edit it with your favorite text editor, save a copy of it, and **Upload** this copy. You might want to choose this option if you want to keep track of the history of the manifest.
+1. Edit the manifest by locating the `appRoles` setting and adding all four Application Roles.  The role definitions are provided in the JSON block below.  Leave the `allowedMemberTypes` to "User" only.  Each role definition in this manifest must have a different valid **Guid** for the "id" property. Note that the `"value"` property of each role is set to the exact strings "Admin", "Approver", "Observer", and "Writer" (as these strings are used in the code in the application). 
+1. Save the manifest.
 
 The content of `appRoles` should be the following (the `ìd` can be any unique GUID)
 ```JSON
@@ -158,34 +158,91 @@ The content of `appRoles` should be the following (the `ìd` can be any unique G
 
 ### Step 3:  Configure the sample to use your Azure AD tenant
 
-1. Open the solution in Visual Studio.
-2. Open the `web.config` file.
-4. Find the app key `ida:ClientId` and replace the value with the Application ID for the application from the Azure portal.
-5. Find the app key `ida:AppKey` and replace the value with the key for the application from the Azure portal.
-6. Find the app key `ida:Tenant` and replace the value with the domain of your tenant.
-6. If you changed the base URL of the TodoListWebApp sample, find the app key `ida:PostLogoutRedirectUri` and replace the value with the new base URL of the sample.
-7. In `Startup.Auth.cs`, uncomment the first line: `// #define SingleTenantApp`. 
-Indeed, the code you cloned corresponds to the multi-tenant version of the sample. We use conditional compilation to include or exclude the corresponding lines of code which are marked by comments. 
-The effect of uncommenting this first line will be to change the value for the `Authority` to the single-tenant version, and omit the line relating to `ValidateIssuer` in `TokenValidationParameters`.
+In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
-### Step 4:  Run the sample
+Open the solution in Visual Studio to configure the projects
 
-Clean the solution, rebuild the solution, and run it!  Explore the sample by signing in, navigating to different pages, adding tasks, signing out, etc.  Create several user accounts in the Azure Management Portal, and assign them different roles by navigating to the "Users" tab of your application in the Azure Portal.  Create a Security Group in the Azure Management Portal, add users to it, and again add roles to it using an Admin account.  Explore the differences between each role throughout the application, namely the Tasks page.
+#### Configure the service project
 
-## Deploy this Sample to Azure
+1. Open the `WebApp-RoleClaims-DotNet\Web.Config` file
+1. Find the app key `ida:ClientId` and replace the existing value with the application ID (clientId) of the `TaskTrackerWebApp-RoleClaims` application copied from the Azure portal.
+1. Find the app key `ida:TenantId` and replace the existing value with your Azure AD tenant ID.
+1. Find the app key `ida:PostLogoutRedirectUri` and replace the existing value with the base address of the TaskTrackerWebApp-RoleClaims project (by default `https://localhost:44322/`).
+### Step 4: Run the sample
 
-To deploy this application to Azure, you will publish it to an Azure Website.
+Clean the solution, rebuild the solution, and run it. Explore the sample by signing in, navigating to the `Tasks` page, adding tasks, signing out, etc. Create several user accounts in the Azure Management Portal, assign them an app role and create tasks as each different user. Explore the differences between each role throughout the application, namely the Tasks page. Explore the code in **TasksController.cs** as how app roles are assigned to each action.
 
-1. Sign in to the [Azure portal](https://portal.azure.com).
-2. Click New in the top left hand corner, select Web + Mobile --> Web App, select the hosting plan and region, and give your web site a name, e.g. todolistservice-contoso.azurewebsites.net.  Click Create Web Site.
-3. Once the web site is created, click on it to manage it.  For this set of steps, download the publish profile and save it.  Other deployment mechanisms, such as from source control, can also be used.
-4. While still in the Azure portal, navigate back to the Azure AD tenant you used in creating this sample.  Under applications, select your Task Tracker application.  From the **Settings** page, update the Sign-On URL and Reply URL fields to the root address of your published application, for example https://tasktracker-contoso.azurewebsites.net/. 
-5. Switch to Visual Studio and go to the WebApp-RoleClaims-DotNet project. In the web.config file, update the "PostLogoutRedirectUri" value to the root address of your published application as well.
-6. Right click on the project in the Solution Explorer and select Publish.  Click Import, and import the publish profile that you just downloaded.
-7. On the Connection tab, update the Destination URL so that it is https, for example https://tasktracker-contoso.azurewebsites.net.  Click Next.
-8. On the Settings tab, make sure Enable Organizational Authentication is NOT selected.  Click Publish.
-9. Visual Studio will publish the project and automatically open a browser to the URL of the project.  If you see the default web page of the project, the publication was successful.
+Click on the **About** link in the top right corner to get a list of all the claims that were received in the signed-in user's token.
+
+### Step 5: Run the sample as a multi-tenant application
+This sample is already registered in a Microsoft tenant as a multi-tenant application. Therefore you can run it in two different ways, depending on your business needs:
+1. as a Single-Tenant app. The current page explains how to register the application as a single tenant application in your own tenant, 
+1. as a Multi-Tenant app. Read the instructions in [Using Azure AD application roles & role claims in a multi-tenant application](./MultiTenant.md) on how to run this sample as a multi-tenant app.
+
+For more details about when you want to use a single tenant or a multi-tenant application, see the "configuring multi-tenant applications" paragraph of [Integrating applications with Azure Active Directory](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-integrating-applications)
 
 ## Code Walk-Through
 
-Coming soon.
+ This sample uses the OpenID Connect ASP.Net OWIN middleware and ADAL.Net for authentication. The following is a list of flies in the source code that were modified to add authorization to a standard MVC Web application generated by VS.NET.
+
+1. **TasksController.cs** - The actions in this controller are decorated with the **Authorize** attribute listing the app roles that are allowed to execute that action.
+1. **Startup.Auth.cs** - This class contains the standard method to configure this web application as single-tenant.
+1. **Startup.Multitenant.Auth.cs** - This class contains the code with explaination on how to configure this web application as multi-tenant application.
+1. **AuthorizeAttribute.cs** - This class overrides the standard implementation of the ASP.NET AuthorizeAttribute class to handle a 401 (Unauthorized) scenario that will result in an infinite loop.
+
+## How to deploy this sample to Azure
+
+This project has one WebApp / Web API projects. To deploy them to Azure Web Sites, you'll need, for each one, to:
+
+- create an Azure Web Site
+- publish the Web App / Web APIs to the web site, and
+- update its client(s) to call the web site instead of IIS Express.
+
+### Create and publish the `TaskTrackerWebApp-RoleClaims` to an Azure Web Site
+
+1. Sign in to the [Azure portal](https://portal.azure.com).
+2. Click **Create a resource** in the top left-hand corner, select **Web + Mobile** --> **Web App**, select the hosting plan and region, and give your web site a name, for example, `TaskTrackerWebApp-RoleClaims-contoso.azurewebsites.net`.  Click Create Web Site.
+1. Choose **SQL Database**, click on "Create a new database", enter `RoleClaimContext` as the **DB Connection String Name**.
+1. Select or create a database server, and enter server login credentials.
+1. Once the web site is created, click on it to manage it. For this set of steps, download the publish profile by clicking **Get publish profile** and save it.  Other deployment mechanisms, such as from source control, can also be used.
+1. Switch to Visual Studio and go to the TaskTrackerWebApp-RoleClaims project. Right click on the project in the Solution Explorer and select **Publish**.  Click **Import Profile** on the bottom bar, and import the publish profile that you downloaded earlier.
+1. Click on **Settings** and in the `Connection tab`, update the Destination URL so that it is https, for example [https://TaskTrackerWebApp-RoleClaims-contoso.azurewebsites.net](https://TaskTrackerWebApp-RoleClaims-contoso.azurewebsites.net). Click Next.
+1. On the Settings tab, make sure `Enable Organizational Authentication` is NOT selected. Click **Save**. Click on **Publish** on the main screen.
+1. Visual Studio will publish the project and automatically open a browser to the URL of the project.  If you see the default web page of the project, the publication was successful.
+
+### Update the Active Directory tenant application registration for `TaskTrackerWebApp-RoleClaims`
+
+1. Navigate to the [Azure portal](https://portal.azure.com).
+1. On the top bar, click on your account and under the **Directory** list, choose the Active Directory tenant containing the `TaskTrackerWebApp-RoleClaims` application.
+1. On the applications tab, select the `TaskTrackerWebApp-RoleClaims` application.
+1. In the **Settings** | page for your application, update the Logout URL fields with the address of your service, for example [https://TaskTrackerWebApp-RoleClaims-contoso.azurewebsites.net](https://TaskTrackerWebApp-RoleClaims-contoso.azurewebsites.net)
+1. From the Settings -> Reply URLs menu, update the Sign-On URL, and Reply URL fields to the address of your service, for example [https://TaskTrackerWebApp-RoleClaims-contoso.azurewebsites.net](https://TaskTrackerWebApp-RoleClaims-contoso.azurewebsites.net). Save the configuration.
+
+## Community Help and Support
+
+Use [Stack Overflow](http://stackoverflow.com/questions/tagged/azuread) to get support from the community.
+Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
+Make sure that your questions or comments are tagged with [`adal` `azuread`].
+
+If you find a bug in the sample, please raise the issue on [GitHub Issues](../../issues).
+
+To provide a recommendation, visit the following [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
+
+## Contributing
+
+If you'd like to contribute to this sample, see [CONTRIBUTING.MD](/CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## More information
+
+For more information, see [Azure Active Directory, now with Group Claims and Application Roles] (https://cloudblogs.microsoft.com/enterprisemobility/2014/12/18/azure-active-directory-now-with-group-claims-and-application-roles/)
+
+- [Application roles](https://docs.microsoft.com/en-us/azure/architecture/multitenant-identity/app-roles)
+- [Azure AD Connect sync: Understanding Users, Groups, and Contacts](https://docs.microsoft.com/en-us/azure/active-directory/connect/active-directory-aadconnectsync-understanding-users-and-contacts)
+- [Recommended pattern to acquire a token](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/AcquireTokenSilentAsync-using-a-cached-token#recommended-pattern-to-acquire-a-token)
+- [Acquiring tokens interactively in public client applications](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/Acquiring-tokens-interactively---Public-client-application-flows)
+- [Customizing Token cache serialization](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/Token-cache-serialization)
+
+For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).
+

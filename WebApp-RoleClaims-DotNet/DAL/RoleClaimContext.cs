@@ -24,10 +24,7 @@ SOFTWARE.
 
 namespace WebApp_RoleClaims_DotNet.DAL
 {
-    using System;
     using System.Data.Entity;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
     using WebApp_RoleClaims_DotNet.Models;
 
     public partial class RoleClaimContext : DbContext
@@ -38,6 +35,5 @@ namespace WebApp_RoleClaims_DotNet.DAL
         }
 
         public DbSet<Task> Tasks { get; set; }
-
     }
 }
