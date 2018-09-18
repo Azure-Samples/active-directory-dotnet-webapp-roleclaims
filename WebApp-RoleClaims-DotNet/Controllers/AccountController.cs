@@ -62,10 +62,13 @@ namespace WebApp_RoleClaims_DotNet.Controllers
             return View();
         }
 
-        public void EndSession()
+        public ActionResult EndSession()
         {
             // If AAD sends a single sign-out message to the app, then end the user's session, but don't redirect to AAD for sign out.
-            HttpContext.GetOwinContext().Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationType);
+            // Clear cache or cookies, if any
+
+            return RedirectToAction("Index", "Home");
+
         }
     }
 }
