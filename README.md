@@ -235,7 +235,7 @@ This project has one WebApp / Web API projects. To deploy them to Azure Web Site
 
 Use [Stack Overflow](http://stackoverflow.com/questions/tagged/azuread) to get support from the community.
 Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
-Make sure that your questions or comments are tagged with [`adal` `azuread`].
+Make sure that your questions or comments are tagged with [[adal](https://stackoverflow.com/tags/adal) or [azuread](https://stackoverflow.com/questions/tagged/azure-active-directory)].
 
 If you find a bug in the sample, please raise the issue on [GitHub Issues](../../issues).
 
@@ -249,7 +249,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## More information
 
-For more information, see [Azure Active Directory, now with Group Claims and Application Roles] (https://cloudblogs.microsoft.com/enterprisemobility/2014/12/18/azure-active-directory-now-with-group-claims-and-application-roles/)
+For more information, see [Azure Active Directory, now with Group Claims and Application Roles](https://cloudblogs.microsoft.com/enterprisemobility/2014/12/18/azure-active-directory-now-with-group-claims-and-application-roles/)
 
 - [Developing ASP.NET Apps with Azure Active Directory](https://docs.microsoft.com/en-us/aspnet/identity/overview/getting-started/developing-aspnet-apps-with-windows-azure-active-directory#create-an-aspnet-application)
 - [Token validation](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/ValidatingTokens)
