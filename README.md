@@ -12,11 +12,9 @@ endpoint: AAD V1
 
 ![Build badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/38/badge)
 
-> There's a newer version of this sample! Check it out: https://github.com/azure-samples/ms-identity-aspnetcore-webapp-tutorial/tree/master/5-WebApp-AuthZ-Roles-Groups
+> There's a newer version of this sample! Check it out: https://github.com/Azure-Samples/active-directory-aspnetcore-webapp-openidconnect-v2/tree/master/5-WebApp-AuthZ/5-1-Roles
 >
 > This newer sample takes advantage of the Microsoft identity platform (formerly Azure AD v2.0).
->
-> While still in public preview, every component is supported in production environments.
 
 ## About this sample
 
