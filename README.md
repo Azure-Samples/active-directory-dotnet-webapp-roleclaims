@@ -49,7 +49,7 @@ Our Task Tracker application defines the following four *Application Roles*:
 
 These application roles are defined in the [Azure portal](https://portal.azure.com) in the application's registration manifest.  When a user signs into the application, Azure AD emits a `roles` claim for each role that the user has been granted individually to the user and from their group membership.  Assignment of users and groups to roles can be done through the portal's UI, or programmatically using the [Microsoft Graph](https://graph.microsoft.com).  In this sample, application role management is done through the Azure portal.
 
-NOTE: Role claims are not currently emitted for guest users in a tenant (see issue #2).
+NOTE: Role claims will not be present for guest users in a tenant if the `/common` endpoint is used as the authority.
 
 ## How to run this sample
 
